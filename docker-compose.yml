@@ -1,0 +1,125 @@
+# =============================================================================
+# MINECRAFT SERVER - DOCKER COMPOSE (Option 1: Tailscale VPN - RECOMMANDÉ)
+# =============================================================================
+# Aucun port exposé sur Internet. Les amis se connectent via Tailscale.
+# Image: itzg/minecraft-server (image officielle communautaire, très maintenue)
+# =============================================================================
+
+services:
+  minecraft:
+    image: itzg/minecraft-server:${MC_IMAGE_TAG:-java21}
+    container_name: minecraft-server
+
+    # --- RÉSEAU ---
+    # Option Tailscale: écoute sur localhost + IP Tailscale uniquement
+    # Les amis se connectent à l'IP Tailscale de ta machine
+    networks:
+      - gameserver-net
+    # Exposer sur toutes les interfaces (Tailscale + localhost)
+    # Sécurisé car ton pare-feu Windows bloque le port sur l'interface publique
+    ports:
+      - "25565:25565"
+      - "127.0.0.1:25575:25575"  # RCON (localhost uniquement pour sécurité)
+
+    # --- ENVIRONNEMENT ---
+    env_file:
+      - .env
+    environment:
+      # Variables de base (peuvent être overridées dans .env)
+      EULA: "TRUE"
+      TYPE: ${MC_TYPE:-VANILLA}
+      VERSION: ${MC_VERSION:-LATEST}
+      MEMORY: ${MC_MEMORY:-4G}
+      MAX_PLAYERS: ${MC_MAX_PLAYERS:-10}
+      MOTD: ${MC_MOTD:-Serveur Minecraft entre amis}
+      DIFFICULTY: ${MC_DIFFICULTY:-normal}
+      MODE: ${MC_MODE:-survival}
+      PVP: ${MC_PVP:-true}
+      ENABLE_COMMAND_BLOCK: ${MC_COMMAND_BLOCK:-false}
+      SPAWN_PROTECTION: ${MC_SPAWN_PROTECTION:-0}
+      VIEW_DISTANCE: ${MC_VIEW_DISTANCE:-10}
+      # RCON (pour les commandes depuis l'app)
+      ENABLE_RCON: "true"
+      RCON_PASSWORD: ${RCON_PASSWORD:-changeme123}
+      RCON_PORT: 25575
+      BROADCAST_RCON_TO_OPS: "false"
+      # Whitelist (recommandé pour serveur privé)
+      ENFORCE_WHITELIST: ${MC_ENFORCE_WHITELIST:-true}
+      WHITELIST_ENABLED: ${MC_WHITELIST:-true}
+      # Performance
+      USE_AIKAR_FLAGS: "true"
+      # Timezone
+      TZ: ${TZ:-Europe/Paris}
+      # User ID pour les permissions fichiers
+      UID: ${PUID:-1000}
+      GID: ${PGID:-1000}
+
+    # --- VOLUMES ---
+    volumes:
+      - minecraft-data:/data
+      - minecraft-backups:/backups
+
+    # --- SÉCURITÉ CONTAINER ---
+    # Non-root: l'image itzg supporte UID/GID via variables
+    # Capabilities minimales
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    # Pas de privilèges élevés
+    privileged: false
+    # Système de fichiers en lecture seule (sauf volumes)
+    read_only: false  # Minecraft a besoin d'écrire dans /data
+    # Empêcher l'escalade de privilèges
+    security_opt:
+      - no-new-privileges:true
+
+    # --- RESSOURCES ---
+    deploy:
+      resources:
+        limits:
+          cpus: "${MC_CPU_LIMIT:-4.0}"
+          memory: ${MC_MEM_LIMIT:-6G}
+        reservations:
+          cpus: "1.0"
+          memory: 2G
+
+    # --- HEALTHCHECK ---
+    healthcheck:
+      test: mc-health
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+    # --- RESTART POLICY ---
+    restart: unless-stopped
+
+    # --- LOGGING ---
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+# =============================================================================
+# RÉSEAUX
+# =============================================================================
+networks:
+  gameserver-net:
+    name: gameserver-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+volumes:
+  minecraft-data:
+    name: minecraft-data
+  minecraft-backups:
+    name: minecraft-backups

@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\\\Dev\\\\Minecraft\")",
+      "WebSearch",
+      "WebFetch(domain:mcversions.net)",
+      "Bash(mkdir:*)",
+      "Bash(dir /s /b \"C:\\\\Dev\\\\Minecraft\")",
+      "Bash(docker compose:*)",
+      "Bash(docker exec:*)",
+      "Bash(dir /b \"C:\\\\Dev\\\\Minecraft\")",
+      "Bash(dir /b \"C:\\\\Dev\\\\Minecraft\\\\docs\")",
+      "Bash(npm install)",
+      "Bash(npm run dev:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(docker info:*)",
+      "Bash(dir /b \"C:\\\\Dev\\\\Minecraft\\\\app\\\\assets\")",
+      "Bash(npm run build:ui:*)",
+      "Bash(npm run build:electron:*)",
+      "Bash(cat:*)",
+      "Bash(docker ps:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

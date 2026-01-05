@@ -1,0 +1,20 @@
+{
+  "name": "@mcsm/core",
+  "version": "0.1.0",
+  "description": "Core library for Minecraft Server Manager - pure Node.js, no Electron dependencies",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test",
+    "test:watch": "node --test --watch"
+  },
+  "keywords": [
+    "minecraft",
+    "docker",
+    "rcon",
+    "server-management"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

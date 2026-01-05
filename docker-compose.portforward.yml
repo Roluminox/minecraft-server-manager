@@ -1,0 +1,106 @@
+# =============================================================================
+# MINECRAFT SERVER - DOCKER COMPOSE (Option 2: Port-Forwarding)
+# =============================================================================
+# ATTENTION: Cette option expose un port sur Internet.
+# À utiliser uniquement si Tailscale n'est pas possible.
+# Assure-toi d'avoir configuré ton pare-feu (voir docs/firewall.md)
+# =============================================================================
+
+services:
+  minecraft:
+    image: itzg/minecraft-server:${MC_IMAGE_TAG:-java21}
+    container_name: minecraft-server
+
+    # --- RÉSEAU ---
+    networks:
+      - gameserver-net
+    # Port exposé publiquement (port-forwarding requis sur ta box)
+    ports:
+      - "${MC_PORT:-25565}:25565"
+
+    # --- ENVIRONNEMENT ---
+    env_file:
+      - .env
+    environment:
+      EULA: "TRUE"
+      TYPE: ${MC_TYPE:-VANILLA}
+      VERSION: ${MC_VERSION:-LATEST}
+      MEMORY: ${MC_MEMORY:-4G}
+      MAX_PLAYERS: ${MC_MAX_PLAYERS:-10}
+      MOTD: ${MC_MOTD:-Serveur Minecraft entre amis}
+      DIFFICULTY: ${MC_DIFFICULTY:-normal}
+      MODE: ${MC_MODE:-survival}
+      PVP: ${MC_PVP:-true}
+      ENABLE_COMMAND_BLOCK: ${MC_COMMAND_BLOCK:-false}
+      SPAWN_PROTECTION: ${MC_SPAWN_PROTECTION:-0}
+      VIEW_DISTANCE: ${MC_VIEW_DISTANCE:-10}
+      # Sécurité - CRITIQUE en port-forward
+      ENABLE_RCON: "false"
+      BROADCAST_RCON_TO_OPS: "false"
+      # Whitelist OBLIGATOIRE en port-forward
+      ENFORCE_WHITELIST: "true"
+      WHITELIST_ENABLED: "true"
+      # Performance
+      USE_AIKAR_FLAGS: "true"
+      TZ: ${TZ:-Europe/Paris}
+      UID: ${PUID:-1000}
+      GID: ${PGID:-1000}
+
+    # --- VOLUMES ---
+    volumes:
+      - minecraft-data:/data
+      - minecraft-backups:/backups
+
+    # --- SÉCURITÉ CONTAINER ---
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    privileged: false
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
+
+    # --- RESSOURCES ---
+    deploy:
+      resources:
+        limits:
+          cpus: "${MC_CPU_LIMIT:-4.0}"
+          memory: ${MC_MEM_LIMIT:-6G}
+        reservations:
+          cpus: "1.0"
+          memory: 2G
+
+    # --- HEALTHCHECK ---
+    healthcheck:
+      test: mc-health
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+    # --- RESTART POLICY ---
+    restart: unless-stopped
+
+    # --- LOGGING ---
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+networks:
+  gameserver-net:
+    name: gameserver-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  minecraft-data:
+    name: minecraft-data
+  minecraft-backups:
+    name: minecraft-backups

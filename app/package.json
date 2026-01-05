@@ -1,0 +1,71 @@
+{
+  "name": "minecraft-server-manager",
+  "version": "0.1.0",
+  "description": "Desktop application to manage Minecraft servers via Docker",
+  "private": true,
+  "main": "electron/main.js",
+  "workspaces": [
+    "core",
+    "ui"
+  ],
+  "scripts": {
+    "dev": "concurrently -n ui,electron -c blue,green \"npm run dev:ui\" \"npm run dev:electron\"",
+    "dev:ui": "npm run dev -w ui",
+    "dev:electron": "wait-on http://localhost:5173 && electron .",
+    "build": "npm run build:ui && npm run build:electron",
+    "build:ui": "npm run build -w ui",
+    "build:electron": "electron-builder",
+    "start": "electron .",
+    "lint": "eslint . --ext .js,.jsx",
+    "test": "npm run test -w core"
+  },
+  "build": {
+    "appId": "com.minecraft.server-manager",
+    "productName": "Minecraft Server Manager",
+    "directories": {
+      "output": "dist-electron",
+      "buildResources": "assets"
+    },
+    "files": [
+      "electron/**/*",
+      "core/**/*",
+      "ui/dist/**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}"
+    ],
+    "extraResources": [],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "${productName}.exe"
+    }
+  },
+  "dependencies": {
+    "dockerode": "^4.0.2",
+    "dotenv": "^16.4.5",
+    "rcon-client": "^4.2.4"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1",
+    "eslint": "^8.56.0",
+    "wait-on": "^7.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+}
