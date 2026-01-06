@@ -33,12 +33,12 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       // Security
       webSecurity: true,
-      allowRunningInsecureContent: false
+      allowRunningInsecureContent: false,
     },
     // Hide menu bar (show with Alt)
     autoHideMenuBar: true,
     // Show when ready
-    show: false
+    show: false,
   };
 
   mainWindow = new BrowserWindow(windowConfig);

@@ -52,10 +52,10 @@ class BackupHelper {
       Image: this.helperImage,
       Cmd: cmd,
       HostConfig: {
-        Binds: binds
+        Binds: binds,
       },
       AttachStdout: true,
-      AttachStderr: true
+      AttachStderr: true,
     });
 
     try {
@@ -63,7 +63,7 @@ class BackupHelper {
       const stream = await container.attach({
         stream: true,
         stdout: true,
-        stderr: true
+        stderr: true,
       });
 
       let output = '';
@@ -75,7 +75,7 @@ class BackupHelper {
       await container.wait();
 
       // Give stream time to flush
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       return output;
     } finally {
@@ -106,12 +106,20 @@ class BackupHelper {
     onProgress({ phase: 'running', message: 'Creating archive...' });
 
     const cmd = compress
-      ? ['sh', '-c', `cd /data && tar czf /backups/${filename} world 2>/dev/null && stat -c%s /backups/${filename}`]
-      : ['sh', '-c', `cd /data && tar cf /backups/${filename} world 2>/dev/null && stat -c%s /backups/${filename}`];
+      ? [
+          'sh',
+          '-c',
+          `cd /data && tar czf /backups/${filename} world 2>/dev/null && stat -c%s /backups/${filename}`,
+        ]
+      : [
+          'sh',
+          '-c',
+          `cd /data && tar cf /backups/${filename} world 2>/dev/null && stat -c%s /backups/${filename}`,
+        ];
 
     const output = await this._runHelper(cmd, [
       `${this.dataVolume}:/data:ro`,
-      `${this.backupVolume}:/backups`
+      `${this.backupVolume}:/backups`,
     ]);
 
     // Parse size from output (just the number)
@@ -124,7 +132,7 @@ class BackupHelper {
       success: true,
       filename,
       size,
-      path: `/backups/${filename}`
+      path: `/backups/${filename}`,
     };
   }
 
@@ -144,12 +152,20 @@ class BackupHelper {
     onProgress({ phase: 'running', message: 'Extracting backup...' });
 
     const cmd = isCompressed
-      ? ['sh', '-c', `cd /data && rm -rf world.old && mv world world.old 2>/dev/null; tar xzf /backups/${filename} && echo "RESTORED"`]
-      : ['sh', '-c', `cd /data && rm -rf world.old && mv world world.old 2>/dev/null; tar xf /backups/${filename} && echo "RESTORED"`];
+      ? [
+          'sh',
+          '-c',
+          `cd /data && rm -rf world.old && mv world world.old 2>/dev/null; tar xzf /backups/${filename} && echo "RESTORED"`,
+        ]
+      : [
+          'sh',
+          '-c',
+          `cd /data && rm -rf world.old && mv world world.old 2>/dev/null; tar xf /backups/${filename} && echo "RESTORED"`,
+        ];
 
     const output = await this._runHelper(cmd, [
       `${this.dataVolume}:/data`,
-      `${this.backupVolume}:/backups:ro`
+      `${this.backupVolume}:/backups:ro`,
     ]);
 
     const success = output.includes('RESTORED');
@@ -157,12 +173,14 @@ class BackupHelper {
     onProgress({
       phase: 'complete',
       message: success ? 'Restore complete!' : 'Restore failed',
-      success
+      success,
     });
 
     return {
       success,
-      message: success ? 'World restored successfully. Old world saved as world.old' : 'Failed to restore backup'
+      message: success
+        ? 'World restored successfully. Old world saved as world.old'
+        : 'Failed to restore backup',
     };
   }
 
@@ -181,7 +199,7 @@ class BackupHelper {
     }
 
     // Parse ls -la output
-    const lines = output.split('\n').filter(line => line.includes('.tar'));
+    const lines = output.split('\n').filter((line) => line.includes('.tar'));
     const backups = [];
 
     for (const line of lines) {
@@ -194,13 +212,13 @@ class BackupHelper {
         // Extract date from filename (format: name_YYYY-MM-DDTHH-MM-SS-mmmZ.tar.gz)
         const dateMatch = filename.match(/(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})/);
         const date = dateMatch
-          ? new Date(dateMatch[1].replace(/-/g, (m, i) => i > 9 ? ':' : '-'))
+          ? new Date(dateMatch[1].replace(/-/g, (m, i) => (i > 9 ? ':' : '-')))
           : new Date();
 
         backups.push({
           name: filename,
           size,
-          date
+          date,
         });
       }
     }
@@ -215,10 +233,7 @@ class BackupHelper {
    * @returns {Promise<{success: boolean}>}
    */
   async deleteBackup(filename) {
-    await this._runHelper(
-      ['rm', '-f', `/backups/${filename}`],
-      [`${this.backupVolume}:/backups`]
-    );
+    await this._runHelper(['rm', '-f', `/backups/${filename}`], [`${this.backupVolume}:/backups`]);
 
     return { success: true };
   }

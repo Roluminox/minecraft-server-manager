@@ -17,7 +17,10 @@
     "build:electron": "electron-builder",
     "start": "electron .",
     "lint": "eslint . --ext .js,.jsx",
-    "test": "npm run test -w core"
+    "lint:fix": "eslint . --ext .js,.jsx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,json,css,md}\"",
+    "test": "npm run test -w core",
+    "prepare": "husky"
   },
   "build": {
     "appId": "com.minecraft.server-manager",
@@ -43,7 +46,9 @@
       "target": [
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
@@ -57,14 +62,30 @@
     "rcon-client": "^4.2.4"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.28.5",
     "concurrently": "^8.2.2",
     "electron": "^28.1.0",
     "electron-builder": "^24.9.1",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
     "wait-on": "^7.2.0"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
   },
   "author": "",
   "license": "MIT"

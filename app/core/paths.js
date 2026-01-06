@@ -100,7 +100,7 @@ class Paths {
     serverProperties: '/data/server.properties',
     whitelist: '/data/whitelist.json',
     ops: '/data/ops.json',
-    backups: '/backups'
+    backups: '/backups',
   };
 
   // === Utility Methods ===

@@ -4,10 +4,10 @@
 
 const RetryConfig = {
   maxAttempts: 10,
-  initialDelay: 2000,      // 2 seconds
-  maxDelay: 30000,         // 30 seconds
-  totalTimeout: 180000,    // 3 minutes
-  backoffFactor: 1.5
+  initialDelay: 2000, // 2 seconds
+  maxDelay: 30000, // 30 seconds
+  totalTimeout: 180000, // 3 minutes
+  backoffFactor: 1.5,
 };
 
 /**
@@ -54,7 +54,7 @@ async function withRetry(fn, options = {}) {
           maxAttempts: config.maxAttempts,
           error,
           nextDelayMs: delay,
-          elapsedMs: Date.now() - startTime
+          elapsedMs: Date.now() - startTime,
         });
       }
 
@@ -80,7 +80,7 @@ async function retrySimple(fn, attempts = 3, delayMs = 1000) {
     initialDelay: delayMs,
     maxDelay: delayMs,
     backoffFactor: 1,
-    totalTimeout: attempts * delayMs * 2
+    totalTimeout: attempts * delayMs * 2,
   });
 }
 
@@ -90,7 +90,7 @@ async function retrySimple(fn, attempts = 3, delayMs = 1000) {
  * @returns {Promise<void>}
  */
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -102,7 +102,7 @@ function sleep(ms) {
 function debounce(fn, delayMs) {
   let timeoutId = null;
 
-  return function(...args) {
+  return function (...args) {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
@@ -123,7 +123,7 @@ function debounce(fn, delayMs) {
 function throttle(fn, limitMs) {
   let lastRun = 0;
 
-  return function(...args) {
+  return function (...args) {
     const now = Date.now();
 
     if (now - lastRun >= limitMs) {
@@ -139,5 +139,5 @@ module.exports = {
   retrySimple,
   sleep,
   debounce,
-  throttle
+  throttle,
 };

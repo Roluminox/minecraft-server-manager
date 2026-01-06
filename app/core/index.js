@@ -47,5 +47,5 @@ module.exports = {
   // Utils
   withRetry,
   RetryConfig,
-  Logger
+  Logger,
 };

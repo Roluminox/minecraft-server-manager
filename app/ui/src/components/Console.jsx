@@ -63,23 +63,29 @@ function Console({ isRunning }) {
 
       // Add response as a log
       if (response) {
-        setLogs((prev) => [...prev, {
-          raw: `> ${response}`,
-          level: 'INFO',
-          message: response,
-          timestamp: new Date()
-        }]);
+        setLogs((prev) => [
+          ...prev,
+          {
+            raw: `> ${response}`,
+            level: 'INFO',
+            message: response,
+            timestamp: new Date(),
+          },
+        ]);
       }
 
       setCommand('');
     } catch (error) {
       console.error('Command failed:', error);
-      setLogs((prev) => [...prev, {
-        raw: `Error: ${error.message}`,
-        level: 'ERROR',
-        message: error.message,
-        timestamp: new Date()
-      }]);
+      setLogs((prev) => [
+        ...prev,
+        {
+          raw: `Error: ${error.message}`,
+          level: 'ERROR',
+          message: error.message,
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setSending(false);
     }
@@ -167,7 +173,10 @@ function Console({ isRunning }) {
           <div className="text-gray-500">No logs yet...</div>
         ) : (
           logs.map((log, index) => (
-            <div key={index} className={`${getLevelColor(log.level)} whitespace-pre-wrap break-all`}>
+            <div
+              key={index}
+              className={`${getLevelColor(log.level)} whitespace-pre-wrap break-all`}
+            >
               {log.message || log.raw}
             </div>
           ))

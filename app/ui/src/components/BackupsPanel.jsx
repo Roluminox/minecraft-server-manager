@@ -17,7 +17,7 @@ function BackupsPanel() {
     try {
       const [backupsList, backupStats] = await Promise.all([
         window.api.backup.list(),
-        window.api.backup.getStats()
+        window.api.backup.getStats(),
       ]);
 
       setBackups(backupsList);
@@ -62,7 +62,11 @@ function BackupsPanel() {
   };
 
   const handleRestore = async (filename) => {
-    if (!confirm(`Restore backup "${filename}"?\n\nThis will stop the server and replace the current world.`)) {
+    if (
+      !confirm(
+        `Restore backup "${filename}"?\n\nThis will stop the server and replace the current world.`
+      )
+    ) {
       return;
     }
 
@@ -129,11 +133,15 @@ function BackupsPanel() {
             </div>
             <div className="bg-gray-700/50 p-2 rounded">
               <div className="text-gray-400">Total Size</div>
-              <div className="text-lg font-semibold">{stats.totalSizeFormatted || formatSize(stats.totalSize)}</div>
+              <div className="text-lg font-semibold">
+                {stats.totalSizeFormatted || formatSize(stats.totalSize)}
+              </div>
             </div>
             <div className="bg-gray-700/50 p-2 rounded">
               <div className="text-gray-400">Latest</div>
-              <div className="text-sm">{stats.newestDate ? formatDate(stats.newestDate) : 'None'}</div>
+              <div className="text-sm">
+                {stats.newestDate ? formatDate(stats.newestDate) : 'None'}
+              </div>
             </div>
           </div>
         )}
@@ -190,10 +198,7 @@ function BackupsPanel() {
         ) : (
           <ul className="space-y-2">
             {backups.map((backup) => (
-              <li
-                key={backup.name}
-                className="p-3 bg-gray-700/50 rounded border border-gray-600"
-              >
+              <li key={backup.name} className="p-3 bg-gray-700/50 rounded border border-gray-600">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="font-medium">{backup.name}</div>

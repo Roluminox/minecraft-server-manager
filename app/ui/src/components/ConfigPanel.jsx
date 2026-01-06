@@ -16,7 +16,7 @@ function ConfigPanel() {
     try {
       const [configData, schemaData] = await Promise.all([
         window.api.config.getAll(),
-        window.api.config.getSchema()
+        window.api.config.getSchema(),
       ]);
       setConfig(configData);
       setSchema(schemaData);
@@ -51,7 +51,7 @@ function ConfigPanel() {
       if (result.requiresRestart) {
         setMessage({
           type: 'warning',
-          text: 'Settings saved. Some changes require a server restart to take effect.'
+          text: 'Settings saved. Some changes require a server restart to take effect.',
         });
       } else {
         setMessage({ type: 'success', text: 'Settings saved successfully!' });
@@ -87,10 +87,16 @@ function ConfigPanel() {
 
   // Group by category
   const groups = {
-    'Server': ['mc.version', 'mc.type', 'mc.memory', 'mc.maxPlayers'],
-    'Gameplay': ['server.motd', 'server.difficulty', 'server.gamemode', 'server.pvp'],
-    'Security': ['server.onlineMode', 'server.whitelist', 'server.enforceWhitelist', 'rcon.enabled', 'rcon.password'],
-    'World': ['server.seed']
+    Server: ['mc.version', 'mc.type', 'mc.memory', 'mc.maxPlayers'],
+    Gameplay: ['server.motd', 'server.difficulty', 'server.gamemode', 'server.pvp'],
+    Security: [
+      'server.onlineMode',
+      'server.whitelist',
+      'server.enforceWhitelist',
+      'rcon.enabled',
+      'rcon.password',
+    ],
+    World: ['server.seed'],
   };
 
   return (
@@ -124,11 +130,15 @@ function ConfigPanel() {
 
         {/* Message */}
         {message && (
-          <div className={`mt-3 p-3 rounded text-sm ${
-            message.type === 'error' ? 'bg-red-500/20 text-red-300' :
-            message.type === 'warning' ? 'bg-yellow-500/20 text-yellow-300' :
-            'bg-green-500/20 text-green-300'
-          }`}>
+          <div
+            className={`mt-3 p-3 rounded text-sm ${
+              message.type === 'error'
+                ? 'bg-red-500/20 text-red-300'
+                : message.type === 'warning'
+                  ? 'bg-yellow-500/20 text-yellow-300'
+                  : 'bg-green-500/20 text-green-300'
+            }`}
+          >
             {message.text}
           </div>
         )}
@@ -150,7 +160,9 @@ function ConfigPanel() {
                 return (
                   <div key={key} className="flex items-start gap-4">
                     <div className="flex-1">
-                      <label className={`block text-sm font-medium ${isChanged ? 'text-yellow-400' : ''}`}>
+                      <label
+                        className={`block text-sm font-medium ${isChanged ? 'text-yellow-400' : ''}`}
+                      >
                         {item.label}
                         {item.requiresRestart && (
                           <span className="text-xs text-gray-500 ml-2">(requires restart)</span>
@@ -188,7 +200,9 @@ function ConfigInput({ schema, value, onChange }) {
           className="w-full px-3 py-2 bg-gray-900 border border-gray-600 rounded focus:border-green-500 focus:outline-none text-sm"
         >
           {schema.options.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
           ))}
         </select>
       );
@@ -220,9 +234,7 @@ function ConfigInput({ schema, value, onChange }) {
             onChange={(e) => onChange(`${e.target.value}${schema.unit || ''}`)}
             className="w-full"
           />
-          <div className="text-sm text-gray-400 text-center">
-            {value || schema.default}
-          </div>
+          <div className="text-sm text-gray-400 text-center">{value || schema.default}</div>
         </div>
       );
 

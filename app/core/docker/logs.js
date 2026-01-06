@@ -32,7 +32,7 @@ class LogsManager extends EventEmitter {
       stdout: true,
       stderr: true,
       tail: lines,
-      timestamps: true
+      timestamps: true,
     });
 
     return this._parseLogBuffer(logs);
@@ -56,7 +56,7 @@ class LogsManager extends EventEmitter {
       stderr: true,
       follow: true,
       tail: 50,
-      timestamps: true
+      timestamps: true,
     });
 
     this.following = true;
@@ -178,17 +178,17 @@ class LogsManager extends EventEmitter {
       if (buffer.length - offset >= 8 && (buffer[offset] === 1 || buffer[offset] === 2)) {
         const size = buffer.readUInt32BE(offset + 4);
         const content = buffer.slice(offset + 8, offset + 8 + size).toString('utf8');
-        lines.push(...content.split('\n').filter(l => l.trim()));
+        lines.push(...content.split('\n').filter((l) => l.trim()));
         offset += 8 + size;
       } else {
         // No header, just parse rest as text
         text = buffer.slice(offset).toString('utf8');
-        lines.push(...text.split('\n').filter(l => l.trim()));
+        lines.push(...text.split('\n').filter((l) => l.trim()));
         break;
       }
     }
 
-    return lines.map(line => this._parseLine(line));
+    return lines.map((line) => this._parseLine(line));
   }
 
   /**
@@ -204,7 +204,7 @@ class LogsManager extends EventEmitter {
     const levelMatch = line.match(/\[(INFO|WARN|ERROR|DEBUG|FATAL)\]/i);
 
     // Thread: [Server thread/INFO], [main/INFO], etc.
-    const threadMatch = line.match(/\[([^\]\/]+)\/[^\]]+\]/);
+    const threadMatch = line.match(/\[([^\]/]+)\/[^\]]+\]/);
 
     // Extract message (after the last ]: )
     const messageMatch = line.match(/\]:\s*(.*)$/);
@@ -214,7 +214,7 @@ class LogsManager extends EventEmitter {
       timestamp: timestampMatch ? new Date(timestampMatch[1]) : new Date(),
       level: levelMatch ? levelMatch[1].toUpperCase() : 'INFO',
       thread: threadMatch ? threadMatch[1] : null,
-      message: messageMatch ? messageMatch[1] : line
+      message: messageMatch ? messageMatch[1] : line,
     };
   }
 
@@ -228,7 +228,7 @@ class LogsManager extends EventEmitter {
    */
   filterByLevel(logs, levels) {
     const levelSet = new Set(Array.isArray(levels) ? levels : [levels]);
-    return logs.filter(log => levelSet.has(log.level));
+    return logs.filter((log) => levelSet.has(log.level));
   }
 
   /**
@@ -240,7 +240,7 @@ class LogsManager extends EventEmitter {
    */
   search(logs, query, caseSensitive = false) {
     const searchQuery = caseSensitive ? query : query.toLowerCase();
-    return logs.filter(log => {
+    return logs.filter((log) => {
       const text = caseSensitive ? log.raw : log.raw.toLowerCase();
       return text.includes(searchQuery);
     });

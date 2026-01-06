@@ -18,9 +18,7 @@ function App() {
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-green-400">
-            Minecraft Server Manager
-          </h1>
+          <h1 className="text-xl font-bold text-green-400">Minecraft Server Manager</h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-400">
               {window.platform?.isWindows ? 'Windows' : 'Unknown OS'}
@@ -59,37 +57,24 @@ function App() {
               <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
                 {/* Controls & Stats */}
                 <div className="lg:col-span-1 space-y-4">
-                  <ServerControls
-                    status={serverStatus}
-                    onStatusChange={refreshStatus}
-                  />
-                  <ServerStats
-                    isRunning={serverStatus === 'running'}
-                  />
+                  <ServerControls status={serverStatus} onStatusChange={refreshStatus} />
+                  <ServerStats isRunning={serverStatus === 'running'} />
                 </div>
 
                 {/* Console */}
                 <div className="lg:col-span-2 flex flex-col min-h-0">
-                  <Console
-                    isRunning={serverStatus === 'running'}
-                  />
+                  <Console isRunning={serverStatus === 'running'} />
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {activeTab === 'players' && (
-          <PlayersPanel isRunning={serverStatus === 'running'} />
-        )}
+        {activeTab === 'players' && <PlayersPanel isRunning={serverStatus === 'running'} />}
 
-        {activeTab === 'backups' && (
-          <BackupsPanel />
-        )}
+        {activeTab === 'backups' && <BackupsPanel />}
 
-        {activeTab === 'config' && (
-          <ConfigPanel />
-        )}
+        {activeTab === 'config' && <ConfigPanel />}
       </main>
     </div>
   );

@@ -29,11 +29,7 @@ class ReadinessChecker {
    * @returns {Promise<{ready: boolean, rconReady: boolean, startupTimeMs: number}>}
    */
   async waitForReady(options = {}) {
-    const {
-      timeoutMs = 180000,
-      pollIntervalMs = 2000,
-      onProgress = () => {}
-    } = options;
+    const { timeoutMs = 180000, pollIntervalMs = 2000, onProgress = () => {} } = options;
 
     const startTime = Date.now();
 
@@ -47,7 +43,7 @@ class ReadinessChecker {
           phase: 'waiting-container',
           message: 'Waiting for container to start...',
           elapsedMs: elapsed,
-          timeoutMs
+          timeoutMs,
         });
         await this._sleep(pollIntervalMs);
         continue;
@@ -60,7 +56,7 @@ class ReadinessChecker {
           phase: 'waiting-startup',
           message: 'Waiting for server to finish starting...',
           elapsedMs: elapsed,
-          timeoutMs
+          timeoutMs,
         });
         await this._sleep(pollIntervalMs);
         continue;
@@ -73,7 +69,7 @@ class ReadinessChecker {
           phase: 'waiting-port',
           message: 'Waiting for server port to be accessible...',
           elapsedMs: elapsed,
-          timeoutMs
+          timeoutMs,
         });
         await this._sleep(pollIntervalMs);
         continue;
@@ -86,13 +82,13 @@ class ReadinessChecker {
         phase: 'ready',
         message: 'Server is ready!',
         elapsedMs: elapsed,
-        timeoutMs
+        timeoutMs,
       });
 
       return {
         ready: true,
         rconReady,
-        startupTimeMs: elapsed
+        startupTimeMs: elapsed,
       };
     }
 
@@ -108,7 +104,7 @@ class ReadinessChecker {
       this._checkContainerRunning(),
       this._checkDoneLog(),
       this._checkPort(this.port),
-      this._checkPort(this.rconPort)
+      this._checkPort(this.rconPort),
     ]);
 
     return {
@@ -116,7 +112,7 @@ class ReadinessChecker {
       serverReady,
       portOpen,
       rconOpen,
-      fullyReady: containerRunning && serverReady && portOpen
+      fullyReady: containerRunning && serverReady && portOpen,
     };
   }
 
@@ -148,10 +144,11 @@ class ReadinessChecker {
         stdout: true,
         stderr: true,
         tail: 100,
-        timestamps: false
+        timestamps: false,
       });
 
       // Docker logs have 8-byte header per chunk, strip non-printable chars
+      // eslint-disable-next-line no-control-regex
       const logText = logs.toString('utf8').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
       // Look for various "Done" patterns
@@ -202,7 +199,7 @@ class ReadinessChecker {
    * @param {number} ms
    */
   _sleep(ms) {
-    return new Promise(r => setTimeout(r, ms));
+    return new Promise((r) => setTimeout(r, ms));
   }
 }
 

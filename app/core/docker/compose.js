@@ -95,12 +95,12 @@ class ComposeManager {
     const containers = await this.docker.listContainers({
       all: true,
       filters: {
-        label: [`com.docker.compose.project=${this.projectName}`]
-      }
+        label: [`com.docker.compose.project=${this.projectName}`],
+      },
     });
 
     // Find container matching service name
-    const container = containers.find(c => {
+    const container = containers.find((c) => {
       const serviceLabel = c.Labels['com.docker.compose.service'];
       return serviceLabel === serviceName;
     });
@@ -151,13 +151,13 @@ class ComposeManager {
         finishedAt: info.State.FinishedAt,
         exitCode: info.State.ExitCode,
         health: info.State.Health?.Status || null,
-        ports: info.NetworkSettings?.Ports || {}
+        ports: info.NetworkSettings?.Ports || {},
       };
     } catch (error) {
       if (error.message.includes('not found')) {
         return {
           state: 'not_found',
-          running: false
+          running: false,
         };
       }
       throw error;
@@ -190,7 +190,7 @@ class ComposeManager {
       const proc = spawn('docker', args, {
         cwd: this.paths.projectRoot,
         env: { ...process.env },
-        shell: true
+        shell: true,
       });
 
       let stdout = '';

@@ -63,7 +63,7 @@ class BackupManager extends EventEmitter {
       // Create backup
       const result = await this.helper.createBackup(name, {
         compress: true,
-        onProgress: (progress) => this.emit('progress', progress)
+        onProgress: (progress) => this.emit('progress', progress),
       });
 
       // Restart server if we stopped it
@@ -80,7 +80,6 @@ class BackupManager extends EventEmitter {
 
       this.emit('complete', { type: 'backup', ...result });
       return result;
-
     } finally {
       this.isRunning = false;
     }
@@ -113,7 +112,7 @@ class BackupManager extends EventEmitter {
 
       // Restore backup
       const result = await this.helper.restoreBackup(filename, {
-        onProgress: (progress) => this.emit('progress', progress)
+        onProgress: (progress) => this.emit('progress', progress),
       });
 
       // Restart server
@@ -124,7 +123,6 @@ class BackupManager extends EventEmitter {
 
       this.emit('complete', { type: 'restore', ...result });
       return result;
-
     } finally {
       this.isRunning = false;
     }
@@ -137,9 +135,9 @@ class BackupManager extends EventEmitter {
   async listBackups() {
     const backups = await this.helper.listBackups();
 
-    return backups.map(b => ({
+    return backups.map((b) => ({
       ...b,
-      sizeFormatted: this._formatSize(b.size)
+      sizeFormatted: this._formatSize(b.size),
     }));
   }
 
@@ -202,19 +200,19 @@ class BackupManager extends EventEmitter {
         totalSize: 0,
         totalSizeFormatted: '0 B',
         oldestDate: null,
-        newestDate: null
+        newestDate: null,
       };
     }
 
     const totalSize = backups.reduce((sum, b) => sum + b.size, 0);
-    const dates = backups.map(b => b.date).sort((a, b) => a.getTime() - b.getTime());
+    const dates = backups.map((b) => b.date).sort((a, b) => a.getTime() - b.getTime());
 
     return {
       count: backups.length,
       totalSize,
       totalSizeFormatted: this._formatSize(totalSize),
       oldestDate: dates[0],
-      newestDate: dates[dates.length - 1]
+      newestDate: dates[dates.length - 1],
     };
   }
 

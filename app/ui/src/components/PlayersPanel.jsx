@@ -21,7 +21,7 @@ function PlayersPanel({ isRunning }) {
         window.api.players.list(),
         window.api.whitelist.list(),
         window.api.ops.list(),
-        window.api.players.getBanList()
+        window.api.players.getBanList(),
       ]);
 
       setPlayers(playersData);
@@ -146,7 +146,7 @@ function PlayersPanel({ isRunning }) {
           { id: 'online', label: `Online (${players.online})` },
           { id: 'whitelist', label: `Whitelist (${whitelist.players.length})` },
           { id: 'ops', label: `Operators (${ops.length})` },
-          { id: 'bans', label: `Bans (${banList.length})` }
+          { id: 'bans', label: `Bans (${banList.length})` },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -175,12 +175,17 @@ function PlayersPanel({ isRunning }) {
             ) : (
               <ul className="space-y-2">
                 {players.players.map((player) => (
-                  <li key={player} className="flex items-center justify-between p-2 bg-gray-700/50 rounded">
+                  <li
+                    key={player}
+                    className="flex items-center justify-between p-2 bg-gray-700/50 rounded"
+                  >
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-green-500 rounded-full" />
                       {player}
                       {ops.includes(player) && (
-                        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-1 rounded">OP</span>
+                        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-1 rounded">
+                          OP
+                        </span>
                       )}
                     </span>
                     <div className="flex gap-1">
@@ -228,7 +233,10 @@ function PlayersPanel({ isRunning }) {
             ) : (
               <ul className="space-y-2">
                 {whitelist.players.map((player) => (
-                  <li key={player} className="flex items-center justify-between p-2 bg-gray-700/50 rounded">
+                  <li
+                    key={player}
+                    className="flex items-center justify-between p-2 bg-gray-700/50 rounded"
+                  >
                     <span>{player}</span>
                     <button
                       onClick={() => handleWhitelistRemove(player)}
@@ -267,7 +275,10 @@ function PlayersPanel({ isRunning }) {
             ) : (
               <ul className="space-y-2">
                 {ops.map((player) => (
-                  <li key={player} className="flex items-center justify-between p-2 bg-gray-700/50 rounded">
+                  <li
+                    key={player}
+                    className="flex items-center justify-between p-2 bg-gray-700/50 rounded"
+                  >
                     <span className="flex items-center gap-2">
                       <span className="text-yellow-400">*</span>
                       {player}
@@ -293,7 +304,10 @@ function PlayersPanel({ isRunning }) {
             ) : (
               <ul className="space-y-2">
                 {banList.map((player) => (
-                  <li key={player} className="flex items-center justify-between p-2 bg-gray-700/50 rounded">
+                  <li
+                    key={player}
+                    className="flex items-center justify-between p-2 bg-gray-700/50 rounded"
+                  >
                     <span className="text-red-400">{player}</span>
                     <button
                       onClick={() => handlePardon(player)}

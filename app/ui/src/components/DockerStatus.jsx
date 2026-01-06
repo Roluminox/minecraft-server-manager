@@ -54,7 +54,9 @@ function DockerStatus({ onReady }) {
   const isReady = status?.state === 'daemon_ready';
 
   return (
-    <div className={`bg-gray-800 rounded-lg p-4 border ${isReady ? 'border-green-500/30' : 'border-yellow-500/30'}`}>
+    <div
+      className={`bg-gray-800 rounded-lg p-4 border ${isReady ? 'border-green-500/30' : 'border-yellow-500/30'}`}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* Status Icon */}
@@ -62,12 +64,11 @@ function DockerStatus({ onReady }) {
 
           {/* Status Text */}
           <div>
-            <div className="font-medium">
-              {isReady ? 'Docker Ready' : 'Docker Not Ready'}
-            </div>
+            <div className="font-medium">{isReady ? 'Docker Ready' : 'Docker Not Ready'}</div>
             {status?.details?.version && (
               <div className="text-sm text-gray-400">
-                Version {status.details.version} - {status.details.containersRunning || 0} containers running
+                Version {status.details.version} - {status.details.containersRunning || 0}{' '}
+                containers running
               </div>
             )}
             {!isReady && status?.message && (
@@ -96,7 +97,11 @@ function DockerStatus({ onReady }) {
                 )}
                 {status?.nextAction === 'install_docker' && (
                   <button
-                    onClick={() => window.api.app.openExternal('https://docs.docker.com/desktop/install/windows-install/')}
+                    onClick={() =>
+                      window.api.app.openExternal(
+                        'https://docs.docker.com/desktop/install/windows-install/'
+                      )
+                    }
                     className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition-colors"
                   >
                     Install Docker

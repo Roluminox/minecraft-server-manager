@@ -29,7 +29,7 @@ function createRateLimiter(maxPerSecond = 5) {
     check(key) {
       const now = Date.now();
       const window = rateLimiters.get(key) || [];
-      const recent = window.filter(t => now - t < 1000);
+      const recent = window.filter((t) => now - t < 1000);
 
       if (recent.length >= maxPerSecond) {
         return false;
@@ -38,7 +38,7 @@ function createRateLimiter(maxPerSecond = 5) {
       recent.push(now);
       rateLimiters.set(key, recent);
       return true;
-    }
+    },
   };
 }
 
@@ -59,7 +59,12 @@ async function readContainerFile(containerPath) {
   try {
     // Use -u 1000 because /data belongs to minecraft user (UID 1000), not root
     const { stdout } = await execFileAsync('docker', [
-      'exec', '-u', '1000', 'minecraft-server', 'cat', containerPath
+      'exec',
+      '-u',
+      '1000',
+      'minecraft-server',
+      'cat',
+      containerPath,
     ]);
     return stdout;
   } catch (error) {
@@ -78,7 +83,7 @@ async function readOpsFromContainer() {
 
   try {
     const ops = JSON.parse(content);
-    return ops.map(op => op.name).filter(Boolean);
+    return ops.map((op) => op.name).filter(Boolean);
   } catch (error) {
     console.error('Failed to parse ops.json:', error);
     return [];
@@ -95,7 +100,7 @@ async function readBannedPlayersFromContainer() {
 
   try {
     const banned = JSON.parse(content);
-    return banned.map(player => player.name).filter(Boolean);
+    return banned.map((player) => player.name).filter(Boolean);
   } catch (error) {
     console.error('Failed to parse banned-players.json:', error);
     return [];
@@ -143,7 +148,7 @@ async function ensureRcon() {
   // Prevent concurrent connection attempts
   if (rconConnecting) {
     // Wait for ongoing connection
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return rconClient?.isConnected() || false;
   }
 
@@ -243,7 +248,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('docker:wait-ready', async () => {
     return dockerDetector.waitUntilReady({
       maxAttempts: 30,
-      intervalMs: 2000
+      intervalMs: 2000,
     });
   });
 
@@ -343,7 +348,7 @@ function setupIpcHandlers(ipcMain, window = null) {
     try {
       const result = await readinessChecker.waitForReady({
         timeoutMs: 180000, // 3 minutes max
-        pollIntervalMs: 3000
+        pollIntervalMs: 3000,
       });
 
       // Connect RCON when ready
@@ -493,7 +498,8 @@ function setupIpcHandlers(ipcMain, window = null) {
       throw new Error('Command too long (max 200 chars)');
     }
 
-    // Sanitization
+    // Sanitization - check for control characters
+    // eslint-disable-next-line no-control-regex
     if (/[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(cmd)) {
       throw new Error('Command contains invalid characters');
     }
@@ -516,6 +522,9 @@ function setupIpcHandlers(ipcMain, window = null) {
   });
 
   ipcMain.handle('console:start-follow', async (event) => {
+    // Remove any existing listeners to prevent duplicates
+    logsManager.removeAllListeners('log');
+
     logsManager.on('log', (log) => {
       event.sender.send('console:log', log);
     });
@@ -564,7 +573,7 @@ function setupIpcHandlers(ipcMain, window = null) {
       projectRoot: paths.projectRoot,
       dataDir: paths.dataDir,
       backupsDir: paths.backupsDir,
-      logsDir: paths.appLogsDir
+      logsDir: paths.appLogsDir,
     };
   });
 
@@ -636,7 +645,7 @@ function setupIpcHandlers(ipcMain, window = null) {
     }
     const result = await rconCommands.ban(player, reason);
     // Wait for server to write banned-players.json
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
     return result;
   });
 
@@ -647,7 +656,7 @@ function setupIpcHandlers(ipcMain, window = null) {
     }
     const result = await rconCommands.pardon(player);
     // Wait for server to write banned-players.json
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
     return result;
   });
 
@@ -720,7 +729,7 @@ function setupIpcHandlers(ipcMain, window = null) {
     }
     const result = await rconCommands.opAdd(player);
     // Wait for server to write ops.json
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
     return result;
   });
 
@@ -731,7 +740,7 @@ function setupIpcHandlers(ipcMain, window = null) {
     }
     const result = await rconCommands.opRemove(player);
     // Wait for server to write ops.json
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
     return result;
   });
 

@@ -7,7 +7,7 @@ const LogLevel = {
   INFO: 1,
   WARN: 2,
   ERROR: 3,
-  NONE: 4
+  NONE: 4,
 };
 
 class Logger {
@@ -35,7 +35,7 @@ class Logger {
       prefix: this.prefix ? `${this.prefix}:${prefix}` : prefix,
       level: this.level,
       timestamps: this.timestamps,
-      colors: this.colors
+      colors: this.colors,
     });
   }
 
@@ -80,9 +80,10 @@ class Logger {
    * @param {Error|object} errorOrData
    */
   error(message, errorOrData = {}) {
-    const data = errorOrData instanceof Error
-      ? { error: errorOrData.message, stack: errorOrData.stack }
-      : errorOrData;
+    const data =
+      errorOrData instanceof Error
+        ? { error: errorOrData.message, stack: errorOrData.stack }
+        : errorOrData;
 
     this._log(LogLevel.ERROR, 'ERROR', message, data);
   }
@@ -160,10 +161,10 @@ class Logger {
     }
 
     const colors = {
-      DEBUG: '\x1b[90m',  // Gray
-      INFO: '\x1b[36m',   // Cyan
-      WARN: '\x1b[33m',   // Yellow
-      ERROR: '\x1b[31m'   // Red
+      DEBUG: '\x1b[90m', // Gray
+      INFO: '\x1b[36m', // Cyan
+      WARN: '\x1b[33m', // Yellow
+      ERROR: '\x1b[31m', // Red
     };
 
     const color = colors[level] || '';
@@ -195,5 +196,5 @@ const defaultLogger = new Logger();
 module.exports = {
   Logger,
   LogLevel,
-  defaultLogger
+  defaultLogger,
 };

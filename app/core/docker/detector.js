@@ -12,7 +12,7 @@ const DockerState = {
   DAEMON_READY: 'daemon_ready',
   WSL2_ERROR: 'wsl2_error',
   PERMISSION_DENIED: 'permission_denied',
-  UNKNOWN_ERROR: 'unknown_error'
+  UNKNOWN_ERROR: 'unknown_error',
 };
 
 const NextAction = {
@@ -21,7 +21,7 @@ const NextAction = {
   WAIT: 'wait',
   CHECK_WSL2: 'check_wsl2',
   CHECK_PERMISSIONS: 'check_permissions',
-  NONE: 'none'
+  NONE: 'none',
 };
 
 class DockerDetector {
@@ -42,8 +42,8 @@ class DockerDetector {
         message: 'Docker is not installed on this system',
         nextAction: NextAction.INSTALL_DOCKER,
         details: {
-          downloadUrl: 'https://docs.docker.com/desktop/install/windows-install/'
-        }
+          downloadUrl: 'https://docs.docker.com/desktop/install/windows-install/',
+        },
       };
     }
 
@@ -64,8 +64,8 @@ class DockerDetector {
           images: info.Images,
           os: info.OperatingSystem,
           architecture: info.Architecture,
-          memoryTotal: info.MemTotal
-        }
+          memoryTotal: info.MemTotal,
+        },
       };
     } catch (error) {
       return this._analyzeError(error);
@@ -87,7 +87,7 @@ class DockerDetector {
         state: DockerState.DAEMON_OFF,
         message: 'Docker Desktop is not running',
         nextAction: NextAction.OPEN_DOCKER_DESKTOP,
-        details: { error: 'Connection refused', code }
+        details: { error: 'Connection refused', code },
       };
     }
 
@@ -97,7 +97,7 @@ class DockerDetector {
         state: DockerState.DAEMON_OFF,
         message: 'Docker daemon socket not found',
         nextAction: NextAction.OPEN_DOCKER_DESKTOP,
-        details: { error: 'Socket not found', code }
+        details: { error: 'Socket not found', code },
       };
     }
 
@@ -107,7 +107,7 @@ class DockerDetector {
         state: DockerState.PERMISSION_DENIED,
         message: 'Permission denied accessing Docker daemon',
         nextAction: NextAction.CHECK_PERMISSIONS,
-        details: { error: error.message, code }
+        details: { error: error.message, code },
       };
     }
 
@@ -117,7 +117,7 @@ class DockerDetector {
         state: DockerState.WSL2_ERROR,
         message: 'WSL2 backend issue',
         nextAction: NextAction.CHECK_WSL2,
-        details: { error: error.message }
+        details: { error: error.message },
       };
     }
 
@@ -126,7 +126,7 @@ class DockerDetector {
       state: DockerState.UNKNOWN_ERROR,
       message: 'Unknown Docker error',
       nextAction: NextAction.OPEN_DOCKER_DESKTOP,
-      details: { error: error.message, code }
+      details: { error: error.message, code },
     };
   }
 
@@ -151,7 +151,7 @@ class DockerDetector {
       // Try common installation paths
       const paths = [
         'C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe',
-        `${process.env.LOCALAPPDATA}\\Docker\\Docker Desktop.exe`
+        `${process.env.LOCALAPPDATA}\\Docker\\Docker Desktop.exe`,
       ];
 
       const tryOpen = (pathIndex) => {
@@ -189,18 +189,14 @@ class DockerDetector {
    * @returns {Promise<object>} - Detection result when ready
    */
   async waitUntilReady(options = {}) {
-    const {
-      maxAttempts = 30,
-      intervalMs = 2000,
-      onAttempt = () => {}
-    } = options;
+    const { maxAttempts = 30, intervalMs = 2000, onAttempt = () => {} } = options;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       onAttempt({
         attempt,
         maxAttempts,
         elapsedMs: (attempt - 1) * intervalMs,
-        totalMs: maxAttempts * intervalMs
+        totalMs: maxAttempts * intervalMs,
       });
 
       const result = await this.detect();
@@ -209,11 +205,13 @@ class DockerDetector {
       }
 
       if (attempt < maxAttempts) {
-        await new Promise(r => setTimeout(r, intervalMs));
+        await new Promise((r) => setTimeout(r, intervalMs));
       }
     }
 
-    throw new Error(`Docker daemon not ready after ${maxAttempts} attempts (${maxAttempts * intervalMs / 1000}s)`);
+    throw new Error(
+      `Docker daemon not ready after ${maxAttempts} attempts (${(maxAttempts * intervalMs) / 1000}s)`
+    );
   }
 }
 

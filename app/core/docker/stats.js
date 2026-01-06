@@ -84,7 +84,7 @@ class StatsManager extends EventEmitter {
       network: this._calculateNetwork(rawStats),
       blockIO: this._calculateBlockIO(rawStats),
       pids: rawStats.pids_stats?.current || 0,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -100,17 +100,14 @@ class StatsManager extends EventEmitter {
     const preCpuStats = stats.precpu_stats || {};
 
     // Get CPU usage delta
-    const cpuDelta = (cpuStats.cpu_usage?.total_usage || 0) -
-                     (preCpuStats.cpu_usage?.total_usage || 0);
+    const cpuDelta =
+      (cpuStats.cpu_usage?.total_usage || 0) - (preCpuStats.cpu_usage?.total_usage || 0);
 
     // Get system CPU usage delta
-    const systemDelta = (cpuStats.system_cpu_usage || 0) -
-                        (preCpuStats.system_cpu_usage || 0);
+    const systemDelta = (cpuStats.system_cpu_usage || 0) - (preCpuStats.system_cpu_usage || 0);
 
     // Number of CPUs
-    const cpuCount = cpuStats.online_cpus ||
-                     cpuStats.cpu_usage?.percpu_usage?.length ||
-                     1;
+    const cpuCount = cpuStats.online_cpus || cpuStats.cpu_usage?.percpu_usage?.length || 1;
 
     // Calculate percentage (normalized to 0-100%)
     let cpuPercent = 0;
@@ -123,7 +120,7 @@ class StatsManager extends EventEmitter {
       percent: Math.round(cpuPercent * 10) / 10, // Normalized 0-100%
       cores: cpuCount,
       // Total across all cores (can exceed 100%)
-      totalPercent: Math.round(cpuPercent * cpuCount * 10) / 10
+      totalPercent: Math.round(cpuPercent * cpuCount * 10) / 10,
     };
   }
 
@@ -147,11 +144,11 @@ class StatsManager extends EventEmitter {
       limit: limit,
       usedMB: Math.round(realUsage / 1024 / 1024),
       limitMB: Math.round(limit / 1024 / 1024),
-      usedGB: Math.round(realUsage / 1024 / 1024 / 1024 * 10) / 10,
-      limitGB: Math.round(limit / 1024 / 1024 / 1024 * 10) / 10,
+      usedGB: Math.round((realUsage / 1024 / 1024 / 1024) * 10) / 10,
+      limitGB: Math.round((limit / 1024 / 1024 / 1024) * 10) / 10,
       percent: limit > 0 ? Math.round((realUsage / limit) * 100) : 0,
       cache: cache,
-      cacheMB: Math.round(cache / 1024 / 1024)
+      cacheMB: Math.round(cache / 1024 / 1024),
     };
   }
 
@@ -176,21 +173,21 @@ class StatsManager extends EventEmitter {
       interfaces[name] = {
         rxBytes: rx,
         txBytes: tx,
-        rxMB: Math.round(rx / 1024 / 1024 * 10) / 10,
-        txMB: Math.round(tx / 1024 / 1024 * 10) / 10,
+        rxMB: Math.round((rx / 1024 / 1024) * 10) / 10,
+        txMB: Math.round((tx / 1024 / 1024) * 10) / 10,
         rxPackets: net.rx_packets || 0,
         txPackets: net.tx_packets || 0,
         rxErrors: net.rx_errors || 0,
-        txErrors: net.tx_errors || 0
+        txErrors: net.tx_errors || 0,
       };
     }
 
     return {
       rxBytes: totalRx,
       txBytes: totalTx,
-      rxMB: Math.round(totalRx / 1024 / 1024 * 10) / 10,
-      txMB: Math.round(totalTx / 1024 / 1024 * 10) / 10,
-      interfaces
+      rxMB: Math.round((totalRx / 1024 / 1024) * 10) / 10,
+      txMB: Math.round((totalTx / 1024 / 1024) * 10) / 10,
+      interfaces,
     };
   }
 
@@ -217,8 +214,8 @@ class StatsManager extends EventEmitter {
     return {
       read,
       write,
-      readMB: Math.round(read / 1024 / 1024 * 10) / 10,
-      writeMB: Math.round(write / 1024 / 1024 * 10) / 10
+      readMB: Math.round((read / 1024 / 1024) * 10) / 10,
+      writeMB: Math.round((write / 1024 / 1024) * 10) / 10,
     };
   }
 

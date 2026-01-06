@@ -68,6 +68,6 @@ export function useServerStatus() {
     serverStatus,
     serverInfo,
     loading,
-    refreshStatus
+    refreshStatus,
   };
 }

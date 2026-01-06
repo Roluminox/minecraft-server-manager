@@ -166,16 +166,15 @@ class EnvManager {
       let value = trimmed.substring(eqIndex + 1).trim();
 
       // Remove surrounding quotes if present
-      if ((value.startsWith('"') && value.endsWith('"')) ||
-          (value.startsWith("'") && value.endsWith("'"))) {
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
         value = value.slice(1, -1);
       }
 
       // Handle escaped characters
-      value = value
-        .replace(/\\n/g, '\n')
-        .replace(/\\r/g, '\r')
-        .replace(/\\t/g, '\t');
+      value = value.replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t');
 
       vars[key] = value;
     }
@@ -208,8 +207,12 @@ class EnvManager {
         const stringValue = String(value);
 
         // Quote if contains spaces or special characters
-        if (stringValue.includes(' ') || stringValue.includes('#') ||
-            stringValue.includes('\n') || stringValue.includes('\r')) {
+        if (
+          stringValue.includes(' ') ||
+          stringValue.includes('#') ||
+          stringValue.includes('\n') ||
+          stringValue.includes('\r')
+        ) {
           lines.push(`${key}="${stringValue.replace(/"/g, '\\"')}"`);
         } else {
           lines.push(`${key}=${stringValue}`);

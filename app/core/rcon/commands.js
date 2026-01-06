@@ -290,9 +290,11 @@ function parseBanList(response) {
   }
 
   // Check for no bans (various formats)
-  if (response.includes('There are no bans') ||
-      response.includes('There are 0 ban') ||
-      response.match(/There are 0 /i)) {
+  if (
+    response.includes('There are no bans') ||
+    response.includes('There are 0 ban') ||
+    response.match(/There are 0 /i)
+  ) {
     return [];
   }
 
@@ -307,10 +309,10 @@ function parseBanList(response) {
   // Handle both newline-separated and comma-separated formats
   const players = playersPart
     .split(/[\n,]+/)
-    .map(p => p.trim())
+    .map((p) => p.trim())
     .filter(Boolean)
     // Filter out any remaining header text
-    .filter(p => !p.match(/^There are/i));
+    .filter((p) => !p.match(/^There are/i));
 
   return players;
 }

@@ -16,10 +16,10 @@ class RconClient extends EventEmitter {
   constructor(config) {
     super();
     this.config = {
-      host: config.host || '127.0.0.1',  // Force IPv4 to avoid ::1 issues on Windows
+      host: config.host || '127.0.0.1', // Force IPv4 to avoid ::1 issues on Windows
       port: config.port || 25575,
       password: config.password,
-      timeout: config.timeout || 5000
+      timeout: config.timeout || 5000,
     };
 
     this.client = null;
@@ -52,7 +52,7 @@ class RconClient extends EventEmitter {
       initialDelay = 2000,
       maxDelay = 30000,
       backoffFactor = 1.5,
-      onAttempt = () => {}
+      onAttempt = () => {},
     } = options;
 
     let delay = initialDelay;
@@ -61,7 +61,7 @@ class RconClient extends EventEmitter {
       onAttempt({
         attempt,
         maxAttempts,
-        nextDelayMs: delay
+        nextDelayMs: delay,
       });
 
       try {
@@ -151,7 +151,7 @@ class RconClient extends EventEmitter {
       await this.connectWithRetry({
         maxAttempts: 5,
         initialDelay: 5000,
-        onAttempt: (info) => this.emit('reconnect-attempt', info)
+        onAttempt: (info) => this.emit('reconnect-attempt', info),
       });
 
       this.reconnecting = false;
@@ -220,7 +220,7 @@ class RconClient extends EventEmitter {
         command,
         resolve,
         reject,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       this._processQueue();
@@ -291,7 +291,7 @@ class RconClient extends EventEmitter {
     return {
       connected: this.connected,
       reconnecting: this.reconnecting,
-      queueLength: this.queue.length
+      queueLength: this.queue.length,
     };
   }
 
@@ -302,7 +302,7 @@ class RconClient extends EventEmitter {
    * @param {number} ms
    */
   _sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

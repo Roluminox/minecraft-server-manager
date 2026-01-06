@@ -47,7 +47,7 @@ const EventType = {
   // App
   APP_START: 'app_start',
   APP_STOP: 'app_stop',
-  ERROR: 'error'
+  ERROR: 'error',
 };
 
 class EventLogger {
@@ -71,7 +71,7 @@ class EventLogger {
     const entry = {
       timestamp: new Date().toISOString(),
       type,
-      ...data
+      ...data,
     };
 
     await this._appendEntry(entry);
@@ -102,7 +102,7 @@ class EventLogger {
   async logRconCommand(command, source = 'console') {
     return this.log(EventType.RCON_COMMAND, {
       command: command.substring(0, 100), // Truncate for safety
-      source
+      source,
     });
   }
 
@@ -116,7 +116,7 @@ class EventLogger {
     return this.log(EventType.CONFIG_CHANGE, {
       key,
       oldValue: String(oldValue).substring(0, 50),
-      newValue: String(newValue).substring(0, 50)
+      newValue: String(newValue).substring(0, 50),
     });
   }
 
@@ -128,7 +128,7 @@ class EventLogger {
   async logError(message, details = {}) {
     return this.log(EventType.ERROR, {
       message,
-      ...details
+      ...details,
     });
   }
 
@@ -145,7 +145,7 @@ class EventLogger {
       const entries = content
         .split('\n')
         .filter(Boolean)
-        .map(line => {
+        .map((line) => {
           try {
             return JSON.parse(line);
           } catch {
@@ -171,7 +171,7 @@ class EventLogger {
    */
   async getByType(type, count = 50) {
     const all = await this.getRecent(this.maxEntries);
-    return all.filter(e => e.type === type).slice(0, count);
+    return all.filter((e) => e.type === type).slice(0, count);
   }
 
   /**
@@ -182,7 +182,7 @@ class EventLogger {
   async getSince(since) {
     const sinceDate = new Date(since);
     const all = await this.getRecent(this.maxEntries);
-    return all.filter(e => new Date(e.timestamp) > sinceDate);
+    return all.filter((e) => new Date(e.timestamp) > sinceDate);
   }
 
   /**
@@ -216,7 +216,7 @@ class EventLogger {
         entries = content
           .split('\n')
           .filter(Boolean)
-          .map(line => {
+          .map((line) => {
             try {
               return JSON.parse(line);
             } catch {
@@ -239,7 +239,7 @@ class EventLogger {
       }
 
       // Write back
-      const content = entries.map(e => JSON.stringify(e)).join('\n');
+      const content = entries.map((e) => JSON.stringify(e)).join('\n');
       await fs.writeFile(this.logFile, content, 'utf8');
     } catch (error) {
       // Don't throw on logging errors, just log to console

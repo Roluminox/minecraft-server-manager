@@ -14,7 +14,7 @@ const ConfigSchema = {
     options: ['LATEST', '1.21.5', '1.21.4', '1.21.3', '1.20.4', '1.20.2', '1.19.4'],
     default: 'LATEST',
     validate: (v) => typeof v === 'string' && v.length > 0,
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   'mc.type': {
@@ -25,7 +25,7 @@ const ConfigSchema = {
     options: ['VANILLA', 'PAPER', 'SPIGOT', 'FABRIC', 'FORGE', 'QUILT'],
     default: 'VANILLA',
     validate: (v) => ['VANILLA', 'PAPER', 'SPIGOT', 'FABRIC', 'FORGE', 'QUILT'].includes(v),
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   'mc.memory': {
@@ -41,7 +41,7 @@ const ConfigSchema = {
     validate: (v) => /^\d+G$/.test(v) && parseInt(v) >= 1 && parseInt(v) <= 32,
     format: (v) => `${v}G`,
     parse: (v) => parseInt(v),
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   'mc.maxPlayers': {
@@ -53,7 +53,7 @@ const ConfigSchema = {
     max: 100,
     default: 10,
     validate: (v) => Number.isInteger(v) && v >= 1 && v <= 100,
-    requiresRestart: false
+    requiresRestart: false,
   },
 
   // === RCON Settings (ENV) ===
@@ -65,7 +65,7 @@ const ConfigSchema = {
     description: 'Enable remote console access',
     default: true,
     validate: (v) => typeof v === 'boolean',
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   'rcon.password': {
@@ -76,7 +76,7 @@ const ConfigSchema = {
     default: '',
     validate: (v) => typeof v === 'string',
     requiresRestart: true,
-    sensitive: true
+    sensitive: true,
   },
 
   // === Server Settings (via ENV -> docker-compose -> itzg image) ===
@@ -89,7 +89,7 @@ const ConfigSchema = {
     maxLength: 59,
     default: 'A Minecraft Server',
     validate: (v) => typeof v === 'string' && v.length <= 59,
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   'server.difficulty': {
@@ -100,7 +100,7 @@ const ConfigSchema = {
     options: ['peaceful', 'easy', 'normal', 'hard'],
     default: 'normal',
     validate: (v) => ['peaceful', 'easy', 'normal', 'hard'].includes(v),
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   'server.gamemode': {
@@ -111,7 +111,7 @@ const ConfigSchema = {
     options: ['survival', 'creative', 'adventure', 'spectator'],
     default: 'survival',
     validate: (v) => ['survival', 'creative', 'adventure', 'spectator'].includes(v),
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   'server.pvp': {
@@ -121,7 +121,7 @@ const ConfigSchema = {
     description: 'Allow player vs player combat',
     default: true,
     validate: (v) => typeof v === 'boolean',
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   'server.onlineMode': {
@@ -131,7 +131,7 @@ const ConfigSchema = {
     description: 'Require Minecraft account authentication',
     default: true,
     validate: (v) => typeof v === 'boolean',
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   'server.seed': {
@@ -141,7 +141,7 @@ const ConfigSchema = {
     description: 'Seed for world generation (leave empty for random)',
     default: '',
     validate: (v) => typeof v === 'string',
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   // === Whitelist Settings ===
@@ -153,7 +153,7 @@ const ConfigSchema = {
     description: 'Only whitelisted players can join',
     default: true,
     validate: (v) => typeof v === 'boolean',
-    requiresRestart: true
+    requiresRestart: true,
   },
 
   'server.enforceWhitelist': {
@@ -163,8 +163,8 @@ const ConfigSchema = {
     description: 'Kick players not on whitelist when enabled',
     default: true,
     validate: (v) => typeof v === 'boolean',
-    requiresRestart: true
-  }
+    requiresRestart: true,
+  },
 };
 
 /**
@@ -248,5 +248,5 @@ module.exports = {
   getKeysByTarget,
   validate,
   getDefault,
-  getAllDefaults
+  getAllDefaults,
 };

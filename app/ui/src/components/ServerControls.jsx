@@ -33,7 +33,8 @@ function ServerControls({ status, onStatusChange }) {
     setIsRestarting(true);
     try {
       await window.api.server.restart();
-      window.api.server.waitForReady()
+      window.api.server
+        .waitForReady()
         .then(() => setIsRestarting(false))
         .catch((err) => {
           console.error('Wait for ready failed:', err);

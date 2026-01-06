@@ -38,7 +38,10 @@ function parsePlayerList(response) {
   if (colonIndex !== -1 && online > 0) {
     const playersPart = response.substring(colonIndex + 1).trim();
     if (playersPart) {
-      players = playersPart.split(',').map(p => p.trim()).filter(Boolean);
+      players = playersPart
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean);
     }
   }
 
@@ -61,9 +64,9 @@ function parseWhitelist(response) {
 
   // Check if response indicates whitelist status
   const enabledMatch = response.match(/Whitelist is (on|off|enabled|disabled)/i);
-  const enabled = enabledMatch ?
-    (enabledMatch[1].toLowerCase() === 'on' || enabledMatch[1].toLowerCase() === 'enabled') :
-    true;
+  const enabled = enabledMatch
+    ? enabledMatch[1].toLowerCase() === 'on' || enabledMatch[1].toLowerCase() === 'enabled'
+    : true;
 
   // Check for no players
   if (response.includes('no whitelisted players') || response.includes('There are 0')) {
@@ -73,14 +76,20 @@ function parseWhitelist(response) {
   // Extract player count and names
   const match = response.match(/There are (\d+) whitelisted players?:\s*(.+)/i);
   if (match) {
-    const players = match[2].split(',').map(p => p.trim()).filter(Boolean);
+    const players = match[2]
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
     return { enabled, players };
   }
 
   // Try alternative format
   const altMatch = response.match(/:\s*(.+)$/);
   if (altMatch) {
-    const players = altMatch[1].split(',').map(p => p.trim()).filter(Boolean);
+    const players = altMatch[1]
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
     return { enabled, players };
   }
 
@@ -106,12 +115,18 @@ function parseOpList(response) {
   // Try to extract from "There are X ops: player1, player2"
   const match = response.match(/:\s*(.+)$/);
   if (match) {
-    return match[1].split(',').map(p => p.trim()).filter(Boolean);
+    return match[1]
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
   }
 
   // Some servers might return just the list
   if (!response.includes(':') && !response.includes('Unknown')) {
-    return response.split(',').map(p => p.trim()).filter(Boolean);
+    return response
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
   }
 
   return [];
@@ -143,10 +158,10 @@ function parseCommandResponse(response, command) {
     'invalid',
     'not allowed',
     'no targets matched',
-    'nothing changed'
+    'nothing changed',
   ];
 
-  const isError = errorPatterns.some(pattern => lowerResponse.includes(pattern));
+  const isError = errorPatterns.some((pattern) => lowerResponse.includes(pattern));
 
   // Check for success patterns
   const successPatterns = [
@@ -165,19 +180,19 @@ function parseCommandResponse(response, command) {
     'enabled',
     'disabled',
     'saved',
-    'reloaded'
+    'reloaded',
   ];
 
-  const isSuccess = successPatterns.some(pattern => lowerResponse.includes(pattern));
+  const isSuccess = successPatterns.some((pattern) => lowerResponse.includes(pattern));
 
   // If we found a success pattern, it's successful
   // If we found an error pattern without success, it's an error
   // Default to success if no patterns matched (some commands return empty)
-  const success = isSuccess || (!isError);
+  const success = isSuccess || !isError;
 
   return {
     success,
-    message: response
+    message: response,
   };
 }
 
@@ -238,5 +253,5 @@ module.exports = {
   parseCommandResponse,
   parseSeed,
   parseTime,
-  extractPlayerName
+  extractPlayerName,
 };

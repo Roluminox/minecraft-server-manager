@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 
 function ServerStats({ isRunning }) {
   const [stats, setStats] = useState(null);
-  const [error, setError] = useState(null);
 
+  // Reset stats when server stops - intentional synchronous update
   useEffect(() => {
     if (!isRunning) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStats(null);
       return;
     }
@@ -15,7 +16,6 @@ function ServerStats({ isRunning }) {
 
     const unsubscribe = window.api.stats.onStats((newStats) => {
       setStats(newStats);
-      setError(null);
     });
 
     return () => {
