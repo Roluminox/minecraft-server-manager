@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function ServerControls({ status, onStatusChange }) {
   const [error, setError] = useState(null);
   const [isRestarting, setIsRestarting] = useState(false);
+  const [networkIPs, setNetworkIPs] = useState([]);
+  const [copiedIP, setCopiedIP] = useState(null);
+
+  useEffect(() => {
+    window.api.app.getNetworkIPs().then(setNetworkIPs).catch(console.error);
+  }, []);
 
   const handleStart = async () => {
     setError(null);
@@ -53,6 +59,16 @@ function ServerControls({ status, onStatusChange }) {
   const isStopping = status === 'stopping';
   const isTransitioning = isStarting || isStopping || isRestarting;
 
+  const copyToClipboard = (ip) => {
+    const address = `${ip.address}:25565`;
+    navigator.clipboard.writeText(address);
+    setCopiedIP(ip.address);
+    setTimeout(() => setCopiedIP(null), 2000);
+  };
+
+  // Get primary IP (Tailscale preferred)
+  const primaryIP = networkIPs.find((ip) => ip.isTailscale) || networkIPs[0];
+
   return (
     <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
       <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -93,6 +109,48 @@ function ServerControls({ status, onStatusChange }) {
       {error && (
         <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded text-sm text-red-300">
           {error}
+        </div>
+      )}
+
+      {/* Server Address */}
+      {isRunning && primaryIP && (
+        <div className="mb-4 p-3 bg-gray-700/50 rounded">
+          <div className="text-xs text-gray-400 mb-1">Server Address</div>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 text-green-400 font-mono text-sm">
+              {primaryIP.address}:25565
+            </code>
+            <button
+              onClick={() => copyToClipboard(primaryIP)}
+              className="px-2 py-1 text-xs bg-gray-600 hover:bg-gray-500 rounded transition-colors"
+              title="Copy to clipboard"
+            >
+              {copiedIP === primaryIP.address ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          {primaryIP.isTailscale && <div className="text-xs text-blue-400 mt-1">Tailscale</div>}
+          {networkIPs.length > 1 && (
+            <details className="mt-2">
+              <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-400">
+                Other IPs ({networkIPs.length - 1})
+              </summary>
+              <div className="mt-1 space-y-1">
+                {networkIPs
+                  .filter((ip) => ip.address !== primaryIP.address)
+                  .map((ip) => (
+                    <div key={ip.address} className="flex items-center justify-between text-xs">
+                      <span className="text-gray-400 font-mono">{ip.address}:25565</span>
+                      <button
+                        onClick={() => copyToClipboard(ip)}
+                        className="px-1.5 py-0.5 bg-gray-600 hover:bg-gray-500 rounded transition-colors"
+                      >
+                        {copiedIP === ip.address ? 'Copied!' : 'Copy'}
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            </details>
+          )}
         </div>
       )}
 

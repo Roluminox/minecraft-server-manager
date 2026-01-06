@@ -1,200 +1,119 @@
 /**
- * Simple structured logger
+ * Centralized logging with Pino
+ * Provides structured JSON logging with pretty output in development
  */
 
-const LogLevel = {
-  DEBUG: 0,
-  INFO: 1,
-  WARN: 2,
-  ERROR: 3,
-  NONE: 4,
+const pino = require('pino');
+
+// Determine if we're in development
+const isDev = process.env.NODE_ENV !== 'production';
+
+// Log level from environment or default
+const LOG_LEVEL = process.env.LOG_LEVEL || (isDev ? 'debug' : 'info');
+
+// Base Pino configuration
+const pinoConfig = {
+  level: LOG_LEVEL,
+  base: {
+    pid: undefined, // Don't include pid in logs
+  },
+  timestamp: pino.stdTimeFunctions.isoTime,
 };
 
-class Logger {
-  /**
-   * @param {object} options
-   * @param {string} options.prefix - Log prefix
-   * @param {number} options.level - Minimum log level
-   * @param {boolean} options.timestamps - Include timestamps
-   * @param {boolean} options.colors - Use colors (for terminal)
-   */
-  constructor(options = {}) {
-    this.prefix = options.prefix || '';
-    this.level = options.level !== undefined ? options.level : LogLevel.INFO;
-    this.timestamps = options.timestamps !== false;
-    this.colors = options.colors !== false;
-  }
-
-  /**
-   * Create a child logger with a prefix
-   * @param {string} prefix
-   * @returns {Logger}
-   */
-  child(prefix) {
-    return new Logger({
-      prefix: this.prefix ? `${this.prefix}:${prefix}` : prefix,
-      level: this.level,
-      timestamps: this.timestamps,
-      colors: this.colors,
-    });
-  }
-
-  /**
-   * Set log level
-   * @param {number} level
-   */
-  setLevel(level) {
-    this.level = level;
-  }
-
-  /**
-   * Log debug message
-   * @param {string} message
-   * @param {object} data
-   */
-  debug(message, data = {}) {
-    this._log(LogLevel.DEBUG, 'DEBUG', message, data);
-  }
-
-  /**
-   * Log info message
-   * @param {string} message
-   * @param {object} data
-   */
-  info(message, data = {}) {
-    this._log(LogLevel.INFO, 'INFO', message, data);
-  }
-
-  /**
-   * Log warning message
-   * @param {string} message
-   * @param {object} data
-   */
-  warn(message, data = {}) {
-    this._log(LogLevel.WARN, 'WARN', message, data);
-  }
-
-  /**
-   * Log error message
-   * @param {string} message
-   * @param {Error|object} errorOrData
-   */
-  error(message, errorOrData = {}) {
-    const data =
-      errorOrData instanceof Error
-        ? { error: errorOrData.message, stack: errorOrData.stack }
-        : errorOrData;
-
-    this._log(LogLevel.ERROR, 'ERROR', message, data);
-  }
-
-  /**
-   * Internal log method
-   * @param {number} level
-   * @param {string} levelName
-   * @param {string} message
-   * @param {object} data
-   */
-  _log(level, levelName, message, data) {
-    if (level < this.level) return;
-
-    const parts = [];
-
-    // Timestamp
-    if (this.timestamps) {
-      parts.push(this._formatTimestamp());
+// In development, use pino-pretty for readable output
+const transport = isDev
+  ? {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'HH:MM:ss.l',
+        ignore: 'pid,hostname',
+        messageFormat: '{if module}[{module}] {end}{msg}',
+      },
     }
+  : undefined;
 
-    // Level
-    parts.push(this._formatLevel(levelName));
+// Create root logger
+const rootLogger = transport ? pino(pinoConfig, pino.transport(transport)) : pino(pinoConfig);
 
-    // Prefix
-    if (this.prefix) {
-      parts.push(`[${this.prefix}]`);
-    }
-
-    // Message
-    parts.push(message);
-
-    // Data
-    const dataStr = this._formatData(data);
-    if (dataStr) {
-      parts.push(dataStr);
-    }
-
-    const output = parts.join(' ');
-
-    // Output to console
-    switch (level) {
-      case LogLevel.DEBUG:
-        console.debug(output);
-        break;
-      case LogLevel.WARN:
-        console.warn(output);
-        break;
-      case LogLevel.ERROR:
-        console.error(output);
-        break;
-      default:
-        console.log(output);
-    }
-  }
-
-  /**
-   * Format timestamp
-   * @returns {string}
-   */
-  _formatTimestamp() {
-    const now = new Date();
-    const time = now.toISOString().slice(11, 23);
-    return this.colors ? `\x1b[90m${time}\x1b[0m` : time;
-  }
-
-  /**
-   * Format log level
-   * @param {string} level
-   * @returns {string}
-   */
-  _formatLevel(level) {
-    if (!this.colors) {
-      return `[${level}]`;
-    }
-
-    const colors = {
-      DEBUG: '\x1b[90m', // Gray
-      INFO: '\x1b[36m', // Cyan
-      WARN: '\x1b[33m', // Yellow
-      ERROR: '\x1b[31m', // Red
-    };
-
-    const color = colors[level] || '';
-    return `${color}[${level}]\x1b[0m`;
-  }
-
-  /**
-   * Format data object
-   * @param {object} data
-   * @returns {string}
-   */
-  _formatData(data) {
-    if (!data || Object.keys(data).length === 0) {
-      return '';
-    }
-
-    try {
-      const str = JSON.stringify(data);
-      return this.colors ? `\x1b[90m${str}\x1b[0m` : str;
-    } catch {
-      return '';
-    }
-  }
+/**
+ * Create a child logger with a module name
+ * @param {string} module - Module name for log prefix
+ * @returns {import('pino').Logger}
+ */
+function createLogger(module) {
+  return rootLogger.child({ module });
 }
 
-// Default logger instance
-const defaultLogger = new Logger();
+// Pre-created loggers for common modules
+const loggers = {
+  docker: createLogger('Docker'),
+  rcon: createLogger('RCON'),
+  backup: createLogger('Backup'),
+  config: createLogger('Config'),
+  server: createLogger('Server'),
+  ipc: createLogger('IPC'),
+  app: createLogger('App'),
+};
+
+/**
+ * Get or create a logger for a module
+ * @param {string} module - Module name
+ * @returns {import('pino').Logger}
+ */
+function getLogger(module) {
+  if (!loggers[module.toLowerCase()]) {
+    loggers[module.toLowerCase()] = createLogger(module);
+  }
+  return loggers[module.toLowerCase()];
+}
+
+/**
+ * Set global log level
+ * @param {string} level - 'debug' | 'info' | 'warn' | 'error' | 'fatal'
+ */
+function setLogLevel(level) {
+  rootLogger.level = level;
+}
+
+// Legacy exports for backward compatibility
+const LogLevel = {
+  DEBUG: 10,
+  INFO: 20,
+  WARN: 30,
+  ERROR: 40,
+  NONE: 60,
+};
 
 module.exports = {
-  Logger,
+  // New Pino-based API
+  rootLogger,
+  createLogger,
+  getLogger,
+  setLogLevel,
+  loggers,
+
+  // Legacy exports (for gradual migration)
+  Logger: class LegacyLogger {
+    constructor(options = {}) {
+      this.pino = options.prefix ? createLogger(options.prefix) : rootLogger;
+    }
+    child(prefix) {
+      return { pino: this.pino.child({ module: prefix }) };
+    }
+    debug(msg, data) {
+      this.pino.debug(data, msg);
+    }
+    info(msg, data) {
+      this.pino.info(data, msg);
+    }
+    warn(msg, data) {
+      this.pino.warn(data, msg);
+    }
+    error(msg, data) {
+      this.pino.error(data, msg);
+    }
+  },
   LogLevel,
-  defaultLogger,
+  defaultLogger: rootLogger,
 };

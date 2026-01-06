@@ -4,9 +4,10 @@
 
 const { shell, app } = require('electron');
 const path = require('path');
-const fs = require('fs').promises;
 
 // Import core modules
+const { loggers } = require('../core/utils/logger');
+const log = loggers.ipc;
 const { Paths } = require('../core/paths');
 const { DockerDetector, DockerState } = require('../core/docker/detector');
 const { ComposeManager } = require('../core/docker/compose');
@@ -68,7 +69,7 @@ async function readContainerFile(containerPath) {
     ]);
     return stdout;
   } catch (error) {
-    console.error(`Failed to read ${containerPath} from container:`, error.message);
+    log.error({ path: containerPath, err: error }, 'Failed to read from container');
     return null;
   }
 }
@@ -85,7 +86,7 @@ async function readOpsFromContainer() {
     const ops = JSON.parse(content);
     return ops.map((op) => op.name).filter(Boolean);
   } catch (error) {
-    console.error('Failed to parse ops.json:', error);
+    log.error({ err: error }, 'Failed to parse ops.json');
     return [];
   }
 }
@@ -102,7 +103,7 @@ async function readBannedPlayersFromContainer() {
     const banned = JSON.parse(content);
     return banned.map((player) => player.name).filter(Boolean);
   } catch (error) {
-    console.error('Failed to parse banned-players.json:', error);
+    log.error({ err: error }, 'Failed to parse banned-players.json');
     return [];
   }
 }
@@ -158,7 +159,7 @@ async function ensureRcon() {
     // Check if server is running
     const isRunning = await compose.isRunning();
     if (!isRunning) {
-      console.log('RCON: Server not running');
+      log.debug('RCON: Server not running');
       return false;
     }
 
@@ -166,21 +167,21 @@ async function ensureRcon() {
     if (!rconClient) {
       const rconPassword = await envManager.get('RCON_PASSWORD');
       if (!rconPassword) {
-        console.error('RCON: Password not configured');
+        log.error('RCON: Password not configured');
         return false;
       }
-      console.log('RCON: Creating client...');
+      log.debug('RCON: Creating client...');
       rconClient = new RconClient({ password: rconPassword });
       rconCommands = new RconCommands(rconClient);
     }
 
     // Try to connect
-    console.log('RCON: Connecting to 127.0.0.1:25575...');
+    log.info('RCON: Connecting to 127.0.0.1:25575...');
     await rconClient.connectWithRetry({ maxAttempts: 5, delayMs: 1000 });
-    console.log('RCON: Connected successfully!');
+    log.info('RCON: Connected successfully!');
     return true;
   } catch (error) {
-    console.error('RCON: Failed to connect:', error.message);
+    log.error({ err: error }, 'RCON: Failed to connect');
     // Reset client on failure
     rconClient = null;
     rconCommands = null;
@@ -356,7 +357,7 @@ function setupIpcHandlers(ipcMain, window = null) {
         try {
           await rconClient.connectWithRetry({ maxAttempts: 5 });
         } catch (error) {
-          console.error('Failed to connect RCON:', error);
+          log.error({ err: error }, 'Failed to connect RCON');
         }
       }
 
@@ -368,7 +369,7 @@ function setupIpcHandlers(ipcMain, window = null) {
       await eventLogger.log(EventType.SERVER_READY, { startupTimeMs: result.startupTimeMs });
       return result;
     } catch (error) {
-      console.error('Wait for ready failed:', error);
+      log.error({ err: error }, 'Wait for ready failed');
       // Still try to set running if container is actually running
       const isRunning = await compose.isRunning();
       if (isRunning) {
@@ -618,6 +619,38 @@ function setupIpcHandlers(ipcMain, window = null) {
 
   ipcMain.handle('app:quit', async () => {
     app.quit();
+  });
+
+  ipcMain.handle('app:network-ips', async () => {
+    const os = require('os');
+    const interfaces = os.networkInterfaces();
+    const ips = [];
+
+    for (const [name, addrs] of Object.entries(interfaces)) {
+      for (const addr of addrs) {
+        // Skip internal (loopback) and IPv6
+        if (addr.internal || addr.family !== 'IPv4') continue;
+
+        // Detect Tailscale (usually 100.x.x.x range)
+        const isTailscale =
+          name.toLowerCase().includes('tailscale') || addr.address.startsWith('100.');
+
+        ips.push({
+          name,
+          address: addr.address,
+          isTailscale,
+        });
+      }
+    }
+
+    // Sort: Tailscale first, then by name
+    ips.sort((a, b) => {
+      if (a.isTailscale && !b.isTailscale) return -1;
+      if (!a.isTailscale && b.isTailscale) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    return ips;
   });
 
   // === Players Handlers ===

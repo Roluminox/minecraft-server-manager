@@ -4,6 +4,8 @@
 
 const { Rcon } = require('rcon-client');
 const EventEmitter = require('events');
+const { loggers } = require('../utils/logger');
+const log = loggers.rcon;
 
 class RconClient extends EventEmitter {
   /**
@@ -84,18 +86,18 @@ class RconClient extends EventEmitter {
   async connect() {
     if (this.connected) return;
 
-    console.log(`[RCON] Connecting to ${this.config.host}:${this.config.port}...`);
+    log.info({ host: this.config.host, port: this.config.port }, 'Connecting...');
     this.client = await Rcon.connect(this.config);
     this.connected = true;
-    console.log('[RCON] Connected!');
+    log.info('Connected!');
 
     // Setup disconnect handler
     this.client.on('end', () => {
-      console.log('[RCON] Connection ended');
+      log.info('Connection ended');
       this._handleDisconnect();
     });
     this.client.on('error', (error) => {
-      console.error('[RCON] Error:', error.message);
+      log.error({ err: error }, 'Connection error');
       this.emit('error', error);
     });
 

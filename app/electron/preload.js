@@ -82,6 +82,7 @@ contextBridge.exposeInMainWorld('api', {
     openFolder: (type) => ipcRenderer.invoke('app:open-folder', type),
     openExternal: (url) => ipcRenderer.invoke('app:open-external', url),
     quit: () => ipcRenderer.invoke('app:quit'),
+    getNetworkIPs: () => ipcRenderer.invoke('app:network-ips'),
   },
 
   // === Players (V1) ===

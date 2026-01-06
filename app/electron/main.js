@@ -5,6 +5,8 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const { setupIpcHandlers } = require('./ipc-handlers');
+const { loggers } = require('../core/utils/logger');
+const log = loggers.app;
 
 // Keep a global reference of the window object
 let mainWindow = null;
@@ -45,7 +47,7 @@ function createWindow() {
 
   // Handle load errors
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-    console.error('Failed to load:', errorCode, errorDescription);
+    log.error({ errorCode, errorDescription }, 'Failed to load');
   });
 
   // Load the app

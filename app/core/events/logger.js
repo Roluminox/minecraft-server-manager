@@ -5,6 +5,8 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const { loggers } = require('../utils/logger');
+const log = loggers.app;
 
 const EventType = {
   // Server lifecycle
@@ -243,7 +245,7 @@ class EventLogger {
       await fs.writeFile(this.logFile, content, 'utf8');
     } catch (error) {
       // Don't throw on logging errors, just log to console
-      console.error('Failed to log event:', error);
+      log.error({ err: error }, 'Failed to log event');
     }
   }
 }

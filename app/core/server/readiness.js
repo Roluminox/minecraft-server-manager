@@ -4,6 +4,8 @@
  */
 
 const net = require('net');
+const { loggers } = require('../utils/logger');
+const log = loggers.server;
 
 class ReadinessChecker {
   /**
@@ -160,7 +162,7 @@ class ReadinessChecker {
 
       return hasDone || hasRcon;
     } catch (error) {
-      console.error('Check done log error:', error.message);
+      log.debug({ err: error }, 'Check done log error');
       return false;
     }
   }

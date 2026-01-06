@@ -3,8 +3,8 @@
  * This avoids Windows path issues and missing tar commands
  */
 
-const Docker = require('dockerode');
-const path = require('path');
+const { loggers } = require('../utils/logger');
+const log = loggers.backup;
 
 class BackupHelper {
   /**
@@ -26,7 +26,7 @@ class BackupHelper {
     try {
       await this.docker.getImage(this.helperImage).inspect();
     } catch {
-      console.log('Pulling Alpine image for backup helper...');
+      log.info('Pulling Alpine image for backup helper...');
       await new Promise((resolve, reject) => {
         this.docker.pull(this.helperImage, (err, stream) => {
           if (err) return reject(err);
