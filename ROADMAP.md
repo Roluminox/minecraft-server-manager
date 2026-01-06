@@ -2,11 +2,11 @@
 
 ## Vue d'ensemble des versions
 
-| Version | Scope | Objectif |
-|---------|-------|----------|
-| **V0** | MVP Dashboard | Controle serveur fonctionnel |
-| **V1** | Players + Backups | Gestion complete des joueurs et sauvegardes |
-| **V2** | Mods + Automation | Extensibilite et automatisation |
+| Version | Scope | Objectif | Status |
+|---------|-------|----------|--------|
+| **V0** | MVP Dashboard | Controle serveur fonctionnel | ✅ DONE |
+| **V1** | Players + Backups | Gestion complete des joueurs et sauvegardes | ✅ DONE |
+| **V2** | Mods + Automation | Extensibilite et automatisation | 🔜 TODO |
 
 ---
 
@@ -1319,51 +1319,51 @@ async function withRetry(fn, options = {}) {
 +-------------------------------------------------------------------+
 ```
 
-## Checklist V0
+## Checklist V0 ✅ COMPLETED
 
 ### Setup & Structure
-- [ ] Setup monorepo (npm workspaces ou pnpm)
-- [ ] core/package.json + dependances (dockerode, rcon-client)
-- [ ] electron/package.json + config electron-builder
-- [ ] ui/package.json + Vite/React setup
+- [x] Setup monorepo (npm workspaces ou pnpm)
+- [x] core/package.json + dependances (dockerode, rcon-client)
+- [x] electron/package.json + config electron-builder
+- [x] ui/package.json + Vite/React setup
 
 ### Core - Docker
-- [ ] paths.js - centralisation chemins
-- [ ] docker/client.js - connexion dockerode
-- [ ] docker/detector.js - detection + etats + actions
-- [ ] docker/compose.js - CLI spawn + getServiceContainerId
-- [ ] docker/logs.js - EventEmitter + snapshot/follow
-- [ ] docker/stats.js - CPU% delta + tick 2s
+- [x] paths.js - centralisation chemins
+- [x] docker/client.js - connexion dockerode
+- [x] docker/detector.js - detection + etats + actions
+- [x] docker/compose.js - CLI spawn + getServiceContainerId
+- [x] docker/logs.js - EventEmitter + snapshot/follow
+- [x] docker/stats.js - CPU% delta + tick 2s
 
 ### Core - Server
-- [ ] server/readiness.js - port check + log "Done"
-- [ ] rcon/client.js - connectWithRetry + queue + heartbeat
+- [x] server/readiness.js - port check + log "Done"
+- [x] rcon/client.js - connectWithRetry + queue + heartbeat
 
 ### Core - Config
-- [ ] config/env-manager.js - lecture/ecriture .env
-- [ ] config/schema.js - 8 parametres
+- [x] config/env-manager.js - lecture/ecriture .env
+- [x] config/schema.js - 8 parametres
 
 ### Core - Events & Utils
-- [ ] events/logger.js - log minimal
-- [ ] utils/retry.js - backoff exponentiel
-- [ ] utils/logger.js - logging structure
+- [x] events/logger.js - log minimal
+- [x] utils/retry.js - backoff exponentiel
+- [x] utils/logger.js - logging structure
 
 ### Electron
-- [ ] main.js - window + security config
-- [ ] preload.js - API blanche
-- [ ] ipc-handlers.js - bridge + validation + rate limit
+- [x] main.js - window + security config
+- [x] preload.js - API blanche
+- [x] ipc-handlers.js - bridge + validation + rate limit
 
 ### UI
-- [ ] DockerStatus.jsx + actions contextuelles
-- [ ] ServerControls.jsx
-- [ ] ServerStats.jsx
-- [ ] Console.jsx + input securise
-- [ ] ConfigPanel.jsx
+- [x] DockerStatus.jsx + actions contextuelles
+- [x] ServerControls.jsx
+- [x] ServerStats.jsx
+- [x] Console.jsx + input securise
+- [x] ConfigPanel.jsx
 
 ### Build & Packaging
-- [ ] electron-builder config
-- [ ] ui/dist -> copie dans electron
-- [ ] core/ bundle ou copie
+- [x] electron-builder config
+- [x] ui/dist -> copie dans electron
+- [x] core/ bundle ou copie
 - [ ] Test packaging Windows
 
 ### Tests
@@ -1685,23 +1685,31 @@ backup: {
 },
 ```
 
-## Checklist V1
+## Checklist V1 ✅ COMPLETED
 
-- [ ] Core: RCON commands (whitelist, op, kick)
-- [ ] Core: RCON parser
-- [ ] Core: Validation des noms de joueurs
-- [ ] Core: Fallback lecture fichiers JSON
-- [ ] Core: BackupHelper (container alpine)
-- [ ] Core: BackupManager (save-off -> tar -> save-on)
-- [ ] Core: Restore
-- [ ] Core: Retention backups
-- [ ] Electron: IPC handlers players
-- [ ] Electron: IPC handlers backups
-- [ ] UI: Players panel
-- [ ] UI: Whitelist manager
-- [ ] UI: Ops manager
-- [ ] UI: Backups panel
-- [ ] UI: Backup progress
+- [x] Core: RCON commands (whitelist, op, kick, ban, pardon)
+- [x] Core: RCON parser
+- [x] Core: Validation des noms de joueurs
+- [x] Core: Lecture fichiers JSON via docker exec (ops.json, banned-players.json)
+- [x] Core: BackupHelper (container alpine)
+- [x] Core: BackupManager (save-off -> tar -> save-on)
+- [x] Core: Restore
+- [x] Core: Retention backups
+- [x] Electron: IPC handlers players (list, kick, ban, pardon, banlist)
+- [x] Electron: IPC handlers whitelist (list, add, remove, enable, disable)
+- [x] Electron: IPC handlers operators (list, add, remove)
+- [x] Electron: IPC handlers backups (list, create, restore, delete)
+- [x] Electron: Auto-connect RCON for console commands
+- [x] Electron: Auto-sync MC_MEM_LIMIT = MC_MEMORY + 2G
+- [x] UI: Players panel (online players, kick, ban)
+- [x] UI: Whitelist manager (add, remove)
+- [x] UI: Ops manager (add, remove)
+- [x] UI: Bans manager (pardon)
+- [x] UI: Backups panel (create, restore, delete)
+- [x] UI: Backup progress
+- [x] UI: Restart button feedback (Restarting... state)
+- [x] Config: Whitelist toggle (MC_WHITELIST, MC_ENFORCE_WHITELIST)
+- [x] Config: Fix schema to use correct env vars (MC_MOTD, MC_DIFFICULTY, etc.)
 - [ ] Tests backup/restore
 - [ ] Tests RCON commands
 
