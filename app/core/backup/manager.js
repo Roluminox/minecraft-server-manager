@@ -4,6 +4,7 @@
 
 const { BackupHelper } = require('./helper');
 const EventEmitter = require('events');
+const { BackupError, ErrorCode } = require('../errors');
 
 class BackupManager extends EventEmitter {
   /**
@@ -35,7 +36,7 @@ class BackupManager extends EventEmitter {
     const { stopServer = false, applyRetention = true } = options;
 
     if (this.isRunning) {
-      throw new Error('A backup operation is already running');
+      throw new BackupError('A backup operation is already running', ErrorCode.BACKUP_IN_PROGRESS);
     }
 
     this.isRunning = true;
@@ -96,7 +97,7 @@ class BackupManager extends EventEmitter {
     const { autoRestart = true } = options;
 
     if (this.isRunning) {
-      throw new Error('A backup operation is already running');
+      throw new BackupError('A backup operation is already running', ErrorCode.BACKUP_IN_PROGRESS);
     }
 
     this.isRunning = true;

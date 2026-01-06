@@ -5,6 +5,7 @@
 const { Rcon } = require('rcon-client');
 const EventEmitter = require('events');
 const { loggers } = require('../utils/logger');
+const { RconError, ErrorCode } = require('../errors');
 const log = loggers.rcon;
 
 class RconClient extends EventEmitter {
@@ -71,7 +72,12 @@ class RconClient extends EventEmitter {
         return; // Success
       } catch (error) {
         if (attempt === maxAttempts) {
-          throw new Error(`RCON connection failed after ${maxAttempts} attempts: ${error.message}`);
+          throw new RconError(
+            `RCON connection failed after ${maxAttempts} attempts: ${error.message}`,
+            ErrorCode.RCON_CONNECTION_FAILED,
+            { attempts: maxAttempts },
+            error
+          );
         }
 
         await this._sleep(delay);
@@ -236,7 +242,7 @@ class RconClient extends EventEmitter {
    */
   async _sendDirect(command) {
     if (!this.connected || !this.client) {
-      throw new Error('RCON not connected');
+      throw new RconError('RCON not connected', ErrorCode.RCON_NOT_CONNECTED);
     }
 
     return this.client.send(command);
@@ -253,7 +259,7 @@ class RconClient extends EventEmitter {
       if (!this.reconnecting) {
         while (this.queue.length > 0) {
           const queued = this.queue.shift();
-          queued.reject(new Error('RCON not connected'));
+          queued.reject(new RconError('RCON not connected', ErrorCode.RCON_NOT_CONNECTED));
         }
       }
       return;

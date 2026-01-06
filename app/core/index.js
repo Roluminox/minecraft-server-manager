@@ -17,6 +17,7 @@ const { EnvManager } = require('./config/env-manager');
 const { ConfigSchema } = require('./config/schema');
 const { withRetry, RetryConfig } = require('./utils/retry');
 const { Logger } = require('./utils/logger');
+const errors = require('./errors');
 
 module.exports = {
   // Paths
@@ -48,4 +49,7 @@ module.exports = {
   withRetry,
   RetryConfig,
   Logger,
+
+  // Errors
+  ...errors,
 };

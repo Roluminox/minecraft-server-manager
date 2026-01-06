@@ -8,6 +8,13 @@ const path = require('path');
 // Import core modules
 const { loggers } = require('../core/utils/logger');
 const log = loggers.ipc;
+const {
+  ErrorCode,
+  RconError,
+  ConfigError,
+  ValidationError,
+  createError,
+} = require('../core/errors');
 const { Paths } = require('../core/paths');
 const { DockerDetector, DockerState } = require('../core/docker/detector');
 const { ComposeManager } = require('../core/docker/compose');
@@ -413,11 +420,14 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('config:set', async (event, key, value) => {
     const schema = getSchema(key);
     if (!schema) {
-      throw new Error(`Unknown config key: ${key}`);
+      throw new ConfigError(`Unknown config key: ${key}`, ErrorCode.CONFIG_INVALID_KEY, { key });
     }
 
     if (schema.validate && !schema.validate(value)) {
-      throw new Error(`Invalid value for ${key}`);
+      throw new ConfigError(`Invalid value for ${key}`, ErrorCode.CONFIG_INVALID_VALUE, {
+        key,
+        value,
+      });
     }
 
     const oldValue = await envManager.get(key);
@@ -434,11 +444,14 @@ function setupIpcHandlers(ipcMain, window = null) {
     for (const [key, value] of Object.entries(updates)) {
       const schema = getSchema(key);
       if (!schema) {
-        throw new Error(`Unknown config key: ${key}`);
+        throw new ConfigError(`Unknown config key: ${key}`, ErrorCode.CONFIG_INVALID_KEY, { key });
       }
 
       if (schema.validate && !schema.validate(value)) {
-        throw new Error(`Invalid value for ${key}`);
+        throw new ConfigError(`Invalid value for ${key}`, ErrorCode.CONFIG_INVALID_VALUE, {
+          key,
+          value,
+        });
       }
 
       envUpdates[schema.envVar || key] = value;
@@ -483,32 +496,34 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('console:command', async (event, cmd) => {
     // Rate limiting
     if (!consoleLimiter.check('console')) {
-      throw new Error('Rate limit exceeded (max 5 commands/sec)');
+      throw createError(ErrorCode.RATE_LIMIT_EXCEEDED, { limit: '5/sec' });
     }
 
     // Validation
     if (typeof cmd !== 'string') {
-      throw new Error('Command must be a string');
+      throw new ValidationError('Command must be a string', ErrorCode.INVALID_INPUT);
     }
 
     if (cmd.length === 0) {
-      throw new Error('Command cannot be empty');
+      throw new ValidationError('Command cannot be empty', ErrorCode.INVALID_INPUT);
     }
 
     if (cmd.length > 200) {
-      throw new Error('Command too long (max 200 chars)');
+      throw new ValidationError('Command too long (max 200 chars)', ErrorCode.INVALID_INPUT, {
+        maxLength: 200,
+      });
     }
 
     // Sanitization - check for control characters
     // eslint-disable-next-line no-control-regex
     if (/[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(cmd)) {
-      throw new Error('Command contains invalid characters');
+      throw new ValidationError('Command contains invalid characters', ErrorCode.INVALID_INPUT);
     }
 
     // Auto-connect RCON if needed
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
 
     // Log command
@@ -595,7 +610,9 @@ function setupIpcHandlers(ipcMain, window = null) {
         folderPath = paths.appLogsDir;
         break;
       default:
-        throw new Error(`Unknown folder type: ${type}`);
+        throw new ValidationError(`Unknown folder type: ${type}`, ErrorCode.INVALID_INPUT, {
+          type,
+        });
     }
 
     await shell.openPath(folderPath);
@@ -607,10 +624,10 @@ function setupIpcHandlers(ipcMain, window = null) {
     try {
       const parsed = new URL(url);
       if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-        throw new Error('Only HTTP/HTTPS URLs allowed');
+        throw new ValidationError('Only HTTP/HTTPS URLs allowed', ErrorCode.INVALID_INPUT, { url });
       }
     } catch {
-      throw new Error('Invalid URL');
+      throw new ValidationError('Invalid URL', ErrorCode.INVALID_INPUT, { url });
     }
 
     await shell.openExternal(url);
@@ -666,7 +683,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('players:kick', async (event, player, reason) => {
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
     return rconCommands.kick(player, reason);
   });
@@ -674,7 +691,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('players:ban', async (event, player, reason) => {
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
     const result = await rconCommands.ban(player, reason);
     // Wait for server to write banned-players.json
@@ -685,7 +702,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('players:pardon', async (event, player) => {
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
     const result = await rconCommands.pardon(player);
     // Wait for server to write banned-players.json
@@ -711,7 +728,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('whitelist:add', async (event, player) => {
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
     return rconCommands.whitelistAdd(player);
   });
@@ -719,7 +736,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('whitelist:remove', async (event, player) => {
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
     return rconCommands.whitelistRemove(player);
   });
@@ -727,7 +744,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('whitelist:on', async () => {
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
     return rconCommands.whitelistOn();
   });
@@ -735,7 +752,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('whitelist:off', async () => {
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
     return rconCommands.whitelistOff();
   });
@@ -743,7 +760,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('whitelist:reload', async () => {
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
     return rconCommands.whitelistReload();
   });
@@ -758,7 +775,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('ops:add', async (event, player) => {
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
     const result = await rconCommands.opAdd(player);
     // Wait for server to write ops.json
@@ -769,7 +786,7 @@ function setupIpcHandlers(ipcMain, window = null) {
   ipcMain.handle('ops:remove', async (event, player) => {
     const connected = await ensureRcon();
     if (!connected) {
-      throw new Error('RCON not connected. Is the server running?');
+      throw createError(ErrorCode.RCON_NOT_CONNECTED);
     }
     const result = await rconCommands.opRemove(player);
     // Wait for server to write ops.json

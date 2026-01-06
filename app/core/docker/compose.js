@@ -5,6 +5,7 @@
 
 const { spawn } = require('child_process');
 const Docker = require('dockerode');
+const { DockerError, ErrorCode } = require('../errors');
 
 class ComposeManager {
   /**
@@ -106,7 +107,11 @@ class ComposeManager {
     });
 
     if (!container) {
-      throw new Error(`Container for service '${serviceName}' not found. Is the server running?`);
+      throw new DockerError(
+        `Container for service '${serviceName}' not found. Is the server running?`,
+        ErrorCode.CONTAINER_NOT_FOUND,
+        { serviceName }
+      );
     }
 
     return container.Id;
