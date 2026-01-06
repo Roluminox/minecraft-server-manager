@@ -4,6 +4,8 @@ import ServerControls from './components/ServerControls';
 import ServerStats from './components/ServerStats';
 import Console from './components/Console';
 import ConfigPanel from './components/ConfigPanel';
+import PlayersPanel from './components/PlayersPanel';
+import BackupsPanel from './components/BackupsPanel';
 import { useServerStatus } from './hooks/useServerStatus';
 
 function App() {
@@ -30,7 +32,7 @@ function App() {
       {/* Navigation */}
       <nav className="bg-gray-800 border-b border-gray-700 px-4">
         <div className="flex gap-1">
-          {['dashboard', 'config'].map((tab) => (
+          {['dashboard', 'players', 'backups', 'config'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -75,6 +77,14 @@ function App() {
               </div>
             )}
           </div>
+        )}
+
+        {activeTab === 'players' && (
+          <PlayersPanel isRunning={serverStatus === 'running'} />
+        )}
+
+        {activeTab === 'backups' && (
+          <BackupsPanel />
         )}
 
         {activeTab === 'config' && (

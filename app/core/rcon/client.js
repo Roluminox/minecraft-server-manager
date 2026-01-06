@@ -8,7 +8,7 @@ const EventEmitter = require('events');
 class RconClient extends EventEmitter {
   /**
    * @param {object} config
-   * @param {string} config.host - RCON host (default: 'localhost')
+   * @param {string} config.host - RCON host (default: '127.0.0.1')
    * @param {number} config.port - RCON port (default: 25575)
    * @param {string} config.password - RCON password
    * @param {number} config.timeout - Connection timeout in ms (default: 5000)
@@ -16,7 +16,7 @@ class RconClient extends EventEmitter {
   constructor(config) {
     super();
     this.config = {
-      host: config.host || 'localhost',
+      host: config.host || '127.0.0.1',  // Force IPv4 to avoid ::1 issues on Windows
       port: config.port || 25575,
       password: config.password,
       timeout: config.timeout || 5000
@@ -84,12 +84,20 @@ class RconClient extends EventEmitter {
   async connect() {
     if (this.connected) return;
 
+    console.log(`[RCON] Connecting to ${this.config.host}:${this.config.port}...`);
     this.client = await Rcon.connect(this.config);
     this.connected = true;
+    console.log('[RCON] Connected!');
 
     // Setup disconnect handler
-    this.client.on('end', () => this._handleDisconnect());
-    this.client.on('error', (error) => this.emit('error', error));
+    this.client.on('end', () => {
+      console.log('[RCON] Connection ended');
+      this._handleDisconnect();
+    });
+    this.client.on('error', (error) => {
+      console.error('[RCON] Error:', error.message);
+      this.emit('error', error);
+    });
 
     // Start heartbeat
     this._startHeartbeat();

@@ -7,7 +7,7 @@ const ConfigSchema = {
   // === Minecraft Version & Type (ENV) ===
 
   'mc.version': {
-    envVar: 'VERSION',
+    envVar: 'MC_VERSION',
     type: 'select',
     label: 'Minecraft Version',
     description: 'Minecraft server version',
@@ -18,7 +18,7 @@ const ConfigSchema = {
   },
 
   'mc.type': {
-    envVar: 'TYPE',
+    envVar: 'MC_TYPE',
     type: 'select',
     label: 'Server Type',
     description: 'Type of Minecraft server',
@@ -29,10 +29,10 @@ const ConfigSchema = {
   },
 
   'mc.memory': {
-    envVar: 'MEMORY',
+    envVar: 'MC_MEMORY',
     type: 'slider',
     label: 'Memory (RAM)',
-    description: 'Memory allocated to the server',
+    description: 'Memory allocated to the Minecraft server JVM',
     min: 1,
     max: 16,
     step: 1,
@@ -45,7 +45,7 @@ const ConfigSchema = {
   },
 
   'mc.maxPlayers': {
-    envVar: 'MAX_PLAYERS',
+    envVar: 'MC_MAX_PLAYERS',
     type: 'number',
     label: 'Max Players',
     description: 'Maximum number of players',
@@ -79,58 +79,53 @@ const ConfigSchema = {
     sensitive: true
   },
 
-  // === Server Properties ===
+  // === Server Settings (via ENV -> docker-compose -> itzg image) ===
 
   'server.motd': {
-    target: 'server.properties',
-    property: 'motd',
+    envVar: 'MC_MOTD',
     type: 'text',
     label: 'MOTD',
     description: 'Message of the day shown in server list',
     maxLength: 59,
     default: 'A Minecraft Server',
     validate: (v) => typeof v === 'string' && v.length <= 59,
-    requiresRestart: false
+    requiresRestart: true
   },
 
   'server.difficulty': {
-    target: 'server.properties',
-    property: 'difficulty',
+    envVar: 'MC_DIFFICULTY',
     type: 'select',
     label: 'Difficulty',
     description: 'Game difficulty',
     options: ['peaceful', 'easy', 'normal', 'hard'],
     default: 'normal',
     validate: (v) => ['peaceful', 'easy', 'normal', 'hard'].includes(v),
-    requiresRestart: false
+    requiresRestart: true
   },
 
   'server.gamemode': {
-    target: 'server.properties',
-    property: 'gamemode',
+    envVar: 'MC_MODE',
     type: 'select',
     label: 'Default Gamemode',
     description: 'Default gamemode for new players',
     options: ['survival', 'creative', 'adventure', 'spectator'],
     default: 'survival',
     validate: (v) => ['survival', 'creative', 'adventure', 'spectator'].includes(v),
-    requiresRestart: false
+    requiresRestart: true
   },
 
   'server.pvp': {
-    target: 'server.properties',
-    property: 'pvp',
+    envVar: 'MC_PVP',
     type: 'boolean',
     label: 'PvP',
     description: 'Allow player vs player combat',
     default: true,
     validate: (v) => typeof v === 'boolean',
-    requiresRestart: false
+    requiresRestart: true
   },
 
   'server.onlineMode': {
-    target: 'server.properties',
-    property: 'online-mode',
+    envVar: 'ONLINE_MODE',
     type: 'boolean',
     label: 'Online Mode',
     description: 'Require Minecraft account authentication',
@@ -140,13 +135,34 @@ const ConfigSchema = {
   },
 
   'server.seed': {
-    target: 'server.properties',
-    property: 'level-seed',
+    envVar: 'SEED',
     type: 'text',
     label: 'World Seed',
     description: 'Seed for world generation (leave empty for random)',
     default: '',
     validate: (v) => typeof v === 'string',
+    requiresRestart: true
+  },
+
+  // === Whitelist Settings ===
+
+  'server.whitelist': {
+    envVar: 'MC_WHITELIST',
+    type: 'boolean',
+    label: 'Whitelist Enabled',
+    description: 'Only whitelisted players can join',
+    default: true,
+    validate: (v) => typeof v === 'boolean',
+    requiresRestart: true
+  },
+
+  'server.enforceWhitelist': {
+    envVar: 'MC_ENFORCE_WHITELIST',
+    type: 'boolean',
+    label: 'Enforce Whitelist',
+    description: 'Kick players not on whitelist when enabled',
+    default: true,
+    validate: (v) => typeof v === 'boolean',
     requiresRestart: true
   }
 };

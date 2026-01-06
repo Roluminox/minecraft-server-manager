@@ -82,6 +82,42 @@ contextBridge.exposeInMainWorld('api', {
     openFolder: (type) => ipcRenderer.invoke('app:open-folder', type),
     openExternal: (url) => ipcRenderer.invoke('app:open-external', url),
     quit: () => ipcRenderer.invoke('app:quit')
+  },
+
+  // === Players (V1) ===
+  players: {
+    list: () => ipcRenderer.invoke('players:list'),
+    kick: (player, reason) => ipcRenderer.invoke('players:kick', player, reason),
+    ban: (player, reason) => ipcRenderer.invoke('players:ban', player, reason),
+    pardon: (player) => ipcRenderer.invoke('players:pardon', player),
+    getBanList: () => ipcRenderer.invoke('players:banlist')
+  },
+
+  // === Whitelist (V1) ===
+  whitelist: {
+    list: () => ipcRenderer.invoke('whitelist:list'),
+    add: (player) => ipcRenderer.invoke('whitelist:add', player),
+    remove: (player) => ipcRenderer.invoke('whitelist:remove', player),
+    enable: () => ipcRenderer.invoke('whitelist:on'),
+    disable: () => ipcRenderer.invoke('whitelist:off'),
+    reload: () => ipcRenderer.invoke('whitelist:reload')
+  },
+
+  // === Operators (V1) ===
+  ops: {
+    list: () => ipcRenderer.invoke('ops:list'),
+    add: (player) => ipcRenderer.invoke('ops:add', player),
+    remove: (player) => ipcRenderer.invoke('ops:remove', player)
+  },
+
+  // === Backups (V1) ===
+  backup: {
+    list: () => ipcRenderer.invoke('backup:list'),
+    create: (name) => ipcRenderer.invoke('backup:create', name),
+    restore: (filename) => ipcRenderer.invoke('backup:restore', filename),
+    delete: (filename) => ipcRenderer.invoke('backup:delete', filename),
+    getStats: () => ipcRenderer.invoke('backup:stats'),
+    onProgress: createEventHandler('backup:progress')
   }
 });
 

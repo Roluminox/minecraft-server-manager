@@ -89,14 +89,14 @@ function ConfigPanel() {
   const groups = {
     'Server': ['mc.version', 'mc.type', 'mc.memory', 'mc.maxPlayers'],
     'Gameplay': ['server.motd', 'server.difficulty', 'server.gamemode', 'server.pvp'],
-    'Security': ['server.onlineMode', 'rcon.enabled', 'rcon.password'],
+    'Security': ['server.onlineMode', 'server.whitelist', 'server.enforceWhitelist', 'rcon.enabled', 'rcon.password'],
     'World': ['server.seed']
   };
 
   return (
-    <div className="space-y-4">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+      <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Configuration</h2>
           <div className="flex gap-2">
@@ -134,44 +134,46 @@ function ConfigPanel() {
         )}
       </div>
 
-      {/* Config Groups */}
-      {Object.entries(groups).map(([groupName, keys]) => (
-        <div key={groupName} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-          <h3 className="text-md font-semibold mb-4">{groupName}</h3>
-          <div className="space-y-4">
-            {keys.map((key) => {
-              const item = schema[key];
-              if (!item) return null;
+      {/* Config Groups - Scrollable */}
+      <div className="flex-1 overflow-y-auto mt-4 space-y-4 pr-2">
+        {Object.entries(groups).map(([groupName, keys]) => (
+          <div key={groupName} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+            <h3 className="text-md font-semibold mb-4">{groupName}</h3>
+            <div className="space-y-4">
+              {keys.map((key) => {
+                const item = schema[key];
+                if (!item) return null;
 
-              const value = getValue(key, item);
-              const isChanged = changes[key] !== undefined;
+                const value = getValue(key, item);
+                const isChanged = changes[key] !== undefined;
 
-              return (
-                <div key={key} className="flex items-start gap-4">
-                  <div className="flex-1">
-                    <label className={`block text-sm font-medium ${isChanged ? 'text-yellow-400' : ''}`}>
-                      {item.label}
-                      {item.requiresRestart && (
-                        <span className="text-xs text-gray-500 ml-2">(requires restart)</span>
+                return (
+                  <div key={key} className="flex items-start gap-4">
+                    <div className="flex-1">
+                      <label className={`block text-sm font-medium ${isChanged ? 'text-yellow-400' : ''}`}>
+                        {item.label}
+                        {item.requiresRestart && (
+                          <span className="text-xs text-gray-500 ml-2">(requires restart)</span>
+                        )}
+                      </label>
+                      {item.description && (
+                        <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                       )}
-                    </label>
-                    {item.description && (
-                      <p className="text-xs text-gray-500 mt-1">{item.description}</p>
-                    )}
+                    </div>
+                    <div className="w-48">
+                      <ConfigInput
+                        schema={item}
+                        value={value}
+                        onChange={(v) => handleChange(key, v)}
+                      />
+                    </div>
                   </div>
-                  <div className="w-48">
-                    <ConfigInput
-                      schema={item}
-                      value={value}
-                      onChange={(v) => handleChange(key, v)}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

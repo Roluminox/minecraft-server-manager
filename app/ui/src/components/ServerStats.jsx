@@ -67,7 +67,7 @@ function ServerStats({ isRunning }) {
         {/* Memory */}
         <div>
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-400">Memory</span>
+            <span className="text-gray-400">Memory (Container)</span>
             <span className="font-medium">
               {stats.memory?.usedMB || 0} MB / {stats.memory?.limitMB || 0} MB
             </span>
@@ -79,7 +79,7 @@ function ServerStats({ isRunning }) {
             />
           </div>
           <div className="text-xs text-gray-500 mt-1">
-            {stats.memory?.percent || 0}% used
+            {stats.memory?.percent || 0}% of Docker limit (JVM uses less)
           </div>
         </div>
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 function ServerControls({ status, onStatusChange }) {
   const [error, setError] = useState(null);
+  const [isRestarting, setIsRestarting] = useState(false);
 
   const handleStart = async () => {
     setError(null);
@@ -29,14 +30,19 @@ function ServerControls({ status, onStatusChange }) {
 
   const handleRestart = async () => {
     setError(null);
+    setIsRestarting(true);
     try {
       await window.api.server.restart();
-      window.api.server.waitForReady().catch((err) => {
-        console.error('Wait for ready failed:', err);
-      });
+      window.api.server.waitForReady()
+        .then(() => setIsRestarting(false))
+        .catch((err) => {
+          console.error('Wait for ready failed:', err);
+          setIsRestarting(false);
+        });
     } catch (err) {
       console.error('Restart failed:', err);
       setError(`Failed to restart: ${err.message}`);
+      setIsRestarting(false);
     }
   };
 
@@ -44,7 +50,7 @@ function ServerControls({ status, onStatusChange }) {
   const isStopped = status === 'stopped' || status === 'unknown';
   const isStarting = status === 'starting';
   const isStopping = status === 'stopping';
-  const isTransitioning = isStarting || isStopping;
+  const isTransitioning = isStarting || isStopping || isRestarting;
 
   return (
     <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
@@ -69,6 +75,15 @@ function ServerControls({ status, onStatusChange }) {
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
             Server is stopping...
+          </div>
+        </div>
+      )}
+
+      {isRestarting && (
+        <div className="mb-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded text-sm text-orange-300">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
+            Server is restarting...
           </div>
         </div>
       )}
@@ -115,7 +130,7 @@ function ServerControls({ status, onStatusChange }) {
               : 'bg-yellow-600 hover:bg-yellow-700 text-white'
           }`}
         >
-          Restart
+          {isRestarting ? 'Restarting...' : 'Restart'}
         </button>
       </div>
 
